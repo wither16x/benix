@@ -1,7 +1,3 @@
-// Note: this code is certainly dirty, and I'm sorry about that.
-// If you have better knowledge in Amber and want to rewrite it, then thank you.
-//
-
 import { set_e, mkdir, make, nasm, dd, dd_copy, mkfs_fat, mcopy } from "./utils.ab"
 
 pub fun build() {

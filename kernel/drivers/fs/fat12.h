@@ -27,6 +27,8 @@
 #define PATH_SEPARATOR                  '/'
 #define DIR_ROOT                        "/"
 
+#define END_OF_CHAIN                    0xff8
+
 // BIOS Parameter Block (BPB)
 struct __attribute__((packed)) FAT12_BPB {
     u8 jmp[3];                  // jmp + nop
@@ -83,16 +85,16 @@ struct DriverFS_FAT12 {
     u32 data_start_sector;
 
     u16 (*get_next_cluster)(u16 cluster);
-    void (*read_cluster)(u16 cluster, voidptr buffer);
-    u32 (*read_clusters)(u16 cluster, string buffer, u32 bytes);
+    void (*read_cluster)(u16 cluster, u8* buffer);
     bool (*find_entry)(bool is_root, u16 cluster, const string formatted, struct FAT12_DirectoryEntry* out);
     bool (*resolve_path)(const string path, struct FAT12_DirectoryEntry* out);
 
     void (*dir_open)(bool is_root, struct FAT12_DirectoryIterator* iter, u16 first_cluster);
     bool (*dir_advance)(struct FAT12_DirectoryIterator* iter);
     bool (*dir_next)(struct FAT12_DirectoryIterator* iter, struct FAT12_DirectoryEntry* out);
+    i32 (*read_file_stream)(u16 cluster, u8* buffer, u32 bytes);
 
-    i32 (*read_file)(const string filename, voidptr buffer, u32 buffer_size);
+    i32 (*read_file)(const string filename, u8* buffer, u32 buffer_size);
     i32 (*read_dir)(const string path, string buffer);
     i32 (*lookup)(const string filename);
 };

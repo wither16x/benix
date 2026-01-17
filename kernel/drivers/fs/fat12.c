@@ -53,33 +53,12 @@ static u16 get_next_cluster(u16 cluster) {
     return next_cluster;
 }
 
-static void read_cluster(u16 cluster, voidptr buffer) {
+static void read_cluster(u16 cluster, u8* buffer) {
     u32 sector1 = fs.data_start_sector + (cluster - 2) * fs.bpb.sectors_per_cluster;
 
     for (u8 i = 0; i < fs.bpb.sectors_per_cluster; i++) {
-        get_driver_ata()->read(sector1 + i, buffer + i * fs.bpb.bytes_per_sector);
+        get_driver_ata()->read(sector1 + i, (u16*)(buffer + i * fs.bpb.bytes_per_sector));
     }
-}
-
-static u32 read_clusters(u16 cluster, string buffer, u32 bytes) {
-    u32 total = 0;
-
-    while (cluster < 0xff8 && total < bytes) {
-        u8 cluster_buffer[fs.bpb.sectors_per_cluster * fs.bpb.bytes_per_sector];
-        read_cluster(cluster, cluster_buffer);
-
-        u32 to_copy = sizeof(cluster_buffer);
-        if (to_copy > bytes - total) {
-            to_copy = bytes - total;
-        }
-
-        memcpy(buffer + total, cluster_buffer, to_copy);
-        total += to_copy;
-
-        cluster = get_next_cluster(cluster);
-    }
-
-    return total;
 }
 
 bool find_entry(bool is_root, u16 cluster, const string formatted, struct FAT12_DirectoryEntry* out) {
@@ -161,7 +140,7 @@ static bool dir_advance(struct FAT12_DirectoryIterator* iter) {
         rel = iter->sector - (fs.data_start_sector + (iter->current_cluster - 2) * fs.bpb.sectors_per_cluster);
         if (rel >= fs.bpb.sectors_per_cluster) {
             iter->current_cluster = get_next_cluster(iter->current_cluster);
-            if (iter->current_cluster >= 0xff8) {
+            if (iter->current_cluster >= END_OF_CHAIN) {
                 return false;
             }
             iter->sector = fs.data_start_sector + (iter->current_cluster - 2) * fs.bpb.sectors_per_cluster;
@@ -192,11 +171,30 @@ static bool dir_next(struct FAT12_DirectoryIterator* iter, struct FAT12_Director
     }
 }
 
+static i32 read_file_stream(u16 cluster, u8* buffer, u32 bytes) {
+    u32 total = 0;
+    u32 cluster_size = fs.bpb.sectors_per_cluster * fs.bpb.bytes_per_sector;
+    u8 tmp[cluster_size];
+
+    while (cluster < END_OF_CHAIN && total < bytes) {
+        u32 to_copy = bytes - total;
+        if (to_copy > cluster_size)
+            to_copy = cluster_size;
+
+        read_cluster(cluster, tmp);
+        memcpy(buffer + total, tmp, to_copy);
+
+        total += to_copy;
+        cluster = get_next_cluster(cluster);
+    }
+    return total;
+}
+
 /*
     -1: file not found
     -2: is a directory
 */
-static i32 read_file(const string filename, voidptr buffer, u32 buffer_size) {
+static i32 read_file(const string filename, u8* buffer, u32 buffer_size) {
     struct FAT12_DirectoryEntry entry;
 
     if (!resolve_path(filename, &entry)) {
@@ -211,7 +209,7 @@ static i32 read_file(const string filename, voidptr buffer, u32 buffer_size) {
         to_read = buffer_size;
     }
 
-    u32 read = read_clusters(entry.first_cluster_low, buffer, to_read);
+    u32 read = read_file_stream(entry.first_cluster_low, buffer, to_read);
     return (i32)read;
 }
 
@@ -266,12 +264,12 @@ static i32 lookup(const string filename) {
 void init_fsdriver_fat12(void) {
     fs.get_next_cluster = get_next_cluster;
     fs.read_cluster = read_cluster;
-    fs.read_clusters = read_clusters;
     fs.find_entry = find_entry;
     fs.resolve_path = resolve_path;
     fs.dir_open = dir_open;
     fs.dir_advance = dir_advance;
     fs.dir_next = dir_next;
+    fs.read_file_stream = read_file_stream;
     fs.read_file = read_file;
     fs.read_dir = read_dir;
     fs.lookup = lookup;
