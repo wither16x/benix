@@ -40,3 +40,5 @@ i32 fread(const string path, u8* buffer, u32 size);
 i32 lsdir(const string path, string buffer);
 // return a pointer to an entry in the root directory or NULL if the file does not exist
 i32 findfile(string path);
+// create file
+i32 fnew(string path);

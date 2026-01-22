@@ -42,7 +42,7 @@ static inline void __asm_outb(u16 port, u8 val) {
 
 // outw (output word to a port)
 static inline void __asm_outw(u16 port, u16 val) {
-    __asm__ volatile ("outb %w0, %w1" :: "a"(val), "Nd"(port) : "memory");
+    __asm__ volatile ("outw %w0, %w1" :: "a"(val), "Nd"(port) : "memory");
 }
 
 // outl (output dword to a port)

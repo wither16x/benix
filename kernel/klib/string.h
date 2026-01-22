@@ -18,3 +18,7 @@ string strtok(string s, const string delim);
 i32 strcmp(string s1, string s2);
 // Convert a character to uppercase
 i32 toupper(i32 c);
+// Copy a string
+void strcpy(string dest, string src);
+// Copy a given amount of characters of a string
+void strncpy(string dest, string src, i32 size);

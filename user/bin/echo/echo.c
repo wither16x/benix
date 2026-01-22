@@ -2,6 +2,8 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "echo.h"
+
 void main() {
     benix_GetCLIArgs();
 
@@ -9,7 +11,7 @@ void main() {
         return;
     }
 
-    if (strcmp(argv[1], "-h") == 0 || strcmp(argv[1], "--help") == 0) {
+    if (strcmp(argv[1], CMD_HELP_SHORT) == 0 || strcmp(argv[1], CMD_HELP_LONG) == 0) {
         printf("echo -- displays a string followed by a newline\n");
         printf("Usage: echo [text]\n");
         printf("NONE                        : display a newline\n");

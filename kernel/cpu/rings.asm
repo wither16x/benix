@@ -1,5 +1,9 @@
 [bits 32]
 
+%define USER_STACK                  0x200000
+%define USER_CS                     0x1b
+%define USER_DS                     0x23
+
 section .text
 global enter_usermode
 
@@ -8,19 +12,19 @@ enter_usermode:
 
     mov ebx, [esp + 4]
 
-    mov ax, 0x23
+    mov ax, USER_DS
     mov ds, ax
     mov es, ax
     mov fs, ax
     mov gs, ax
 
-    push 0x23
-    push 0x200000
+    push USER_DS
+    push USER_STACK
     pushf
     pop eax
     or eax, 0x200
     push eax
-    push 0x1b
+    push USER_CS
     push ebx
 
     iret

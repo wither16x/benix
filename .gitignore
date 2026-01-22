@@ -9,7 +9,6 @@ images/
 
 # Special files
 compile_commands.json
-TODO.md
 
 # Binaries
 *.bin

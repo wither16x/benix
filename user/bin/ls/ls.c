@@ -3,6 +3,8 @@
 #include <syscall.h>
 #include <string.h>
 
+#include "ls.h"
+
 void main() {
     benix_GetCLIArgs();
 
@@ -10,7 +12,7 @@ void main() {
 
     if (argc < 2) {
         syscall_lsdir("/", buffer);
-    } else if (strcmp(argv[1], "-h") == 0 || strcmp(argv[1], "--help") == 0) {
+    } else if (strcmp(argv[1], CMD_HELP_SHORT) == 0 || strcmp(argv[1], CMD_HELP_LONG) == 0) {
         printf("ls -- displays the name of the files and folders in a directory\n");
         printf("Usage: ls [dir]\n");
         printf("NONE                        : display the content of /\n");

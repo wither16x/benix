@@ -252,3 +252,7 @@ i32 lsdir(const string path, string buffer) {
 i32 findfile(string path) {
     return get_fsdriver_fat12()->lookup(path);
 }
+
+i32 fnew(string path) {
+    return get_fsdriver_fat12()->create_file(path);
+}

@@ -7,18 +7,25 @@
 - Benlibc:
     - added `limits.h`
 - Userspace:
-    - removed syscall 7 (`ffind`)
+    - fixed `syscall_fread()`
+    - added program `touch` (doesn't work yet, it will make an endless loop)
+    - replaced syscall 7 (`ffind`) by `fnew`
     - better error handling in user programs
     - added `LICENSE.txt`
     - reorganized files and directories
     - edited `README.txt`
 - Drivers:
-    - big refactorisation of FAT12 driver
-    - FAT12 driver supports directories
+    - FAT12:
+        - cleaned up API
+        - big refactorisation
+        - subdirectories support
     - VGA driver supports scrollup
+- Klib:
+    - fixed `__asm_outw()` (stupid error, I used `outb` instead of `outw` lol)
+    - added `strncpy()`
+    - added `strcpy()`
 - Bootloader:
     - cleaned up `gdt.asm`
-    - added FAT12 BPB
 - Build:
     - only one disk image is needed (instead of two)
     - replaced build scripts by the Benix installer

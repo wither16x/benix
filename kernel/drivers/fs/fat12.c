@@ -6,7 +6,6 @@
 
 #include "drivers/fs/fat12.h"
 #include "drivers/ata.h"
-#include "klib/logging.h"
 #include "klib/memory.h"
 #include "klib/string.h"
 #include "klib/null.h"
@@ -15,6 +14,8 @@
 
 static struct DriverFS_FAT12 fs;
 
+// PRIVATE FUNCTIONS
+// =============================================================================
 static void format_filename(const string input, string out) {
     memset(out, ' ', FILENAME_CHARS);
 
@@ -34,23 +35,63 @@ static void format_filename(const string input, string out) {
     }
 }
 
+static u16 find_free_cluster(void) {
+    u8 sector[SECTOR_SIZE];
+    u16 val, cluster_val;
+    u32 fat_size = fs.bpb.fat_size;
+    u32 clusters = fs.bpb.total_sectors16 / fs.bpb.sectors_per_cluster;
+    u32 fat_offset, sectorno, offset;
+
+    for (u32 cluster = 2; cluster < clusters; cluster++) {
+        fat_offset = cluster + cluster / 2;
+        sectorno = fs.fat_start_sector + (fat_offset / SECTOR_SIZE);
+        offset = fat_offset % SECTOR_SIZE;
+
+        get_driver_ata()->read(sectorno, (u16*)sector);
+
+        val = *(u16*)(sector + offset);
+        cluster_val = (cluster & 1) ? (val >> 4) & 0xfff : val & 0xfff;
+
+        if (cluster_val == 0) {
+            return cluster;
+        }
+    }
+
+    return 0;
+}
+
 static u16 get_next_cluster(u16 cluster) {
     u32 fat_offset = cluster + cluster / 2;
     u8 sector[SECTOR_SIZE];
     u32 sector_number = fs.fat_start_sector + (fat_offset / fs.bpb.bytes_per_sector);
     u32 offset = fat_offset % fs.bpb.bytes_per_sector;
-    u16 next_cluster;
+    u16 next_cluster, value;
+
+    get_driver_ata()->read(sector_number, (u16*)sector);
+
+    value = *(u16*)(sector + offset);
+    next_cluster = (cluster & 1) ? (value >> 4) & 0xfff : value & 0xfff;
+
+    return next_cluster;
+}
+
+static void set_cluster_end_of_chain(u16 cluster) {
+    u8 sector[SECTOR_SIZE];
+    u32 fat_offset = cluster + cluster / 2;
+    u32 sector_number = fs.fat_start_sector + (fat_offset / SECTOR_SIZE);
+    u32 offset = fat_offset % SECTOR_SIZE;
 
     get_driver_ata()->read(sector_number, (u16*)sector);
 
     u16 value = *(u16*)(sector + offset);
-    if (cluster & 0x1) {
-        next_cluster = value >> 4;
+    if (cluster & 1) {
+        value = (value & 0xf) | (0xfff << 4);
     } else {
-        next_cluster = value & 0xfff;
+        value = (value & 0xf000) | 0xfff;
     }
 
-    return next_cluster;
+    *(u16*)(sector + offset) = value;
+    get_driver_ata()->write(sector_number, (u16*)sector);
 }
 
 static void read_cluster(u16 cluster, u8* buffer) {
@@ -59,52 +100,6 @@ static void read_cluster(u16 cluster, u8* buffer) {
     for (u8 i = 0; i < fs.bpb.sectors_per_cluster; i++) {
         get_driver_ata()->read(sector1 + i, (u16*)(buffer + i * fs.bpb.bytes_per_sector));
     }
-}
-
-bool find_entry(bool is_root, u16 cluster, const string formatted, struct FAT12_DirectoryEntry* out) {
-    struct FAT12_DirectoryIterator iter;
-    struct FAT12_DirectoryEntry e;
-
-    fs.dir_open(is_root, &iter, cluster);
-    
-    while (fs.dir_next(&iter, &e)) {
-        if (memcmp(e.name, formatted, FILENAME_CHARS) == 0) {
-            *out = e;
-            return true;
-        }
-    }
-    return false;
-}
-
-bool resolve_path(const string path, struct FAT12_DirectoryEntry* out) {
-    bool is_root = true;
-    u16 cluster = 0;
-
-    char part[12];
-    string p = path;
-
-    while (*p) {
-        string q = part;
-        while (*p && *p != PATH_SEPARATOR) {
-            *q++ = *p++;
-        }
-        *q = 0;
-        if (*p == PATH_SEPARATOR) {
-            p++;
-        }
-
-        char formatted[FILENAME_CHARS];
-        format_filename(part, formatted);
-
-        if (!find_entry(is_root, cluster, formatted, out)) {
-            return false;
-        }
-
-        is_root = false;
-        cluster = out->first_cluster_low;
-    }
-
-    return true;
 }
 
 static void dir_open(bool is_root, struct FAT12_DirectoryIterator* iter, u16 first_cluster) {
@@ -140,7 +135,7 @@ static bool dir_advance(struct FAT12_DirectoryIterator* iter) {
         rel = iter->sector - (fs.data_start_sector + (iter->current_cluster - 2) * fs.bpb.sectors_per_cluster);
         if (rel >= fs.bpb.sectors_per_cluster) {
             iter->current_cluster = get_next_cluster(iter->current_cluster);
-            if (iter->current_cluster >= END_OF_CHAIN) {
+            if (iter->current_cluster < 2 || iter->current_cluster >= END_OF_CHAIN) {
                 return false;
             }
             iter->sector = fs.data_start_sector + (iter->current_cluster - 2) * fs.bpb.sectors_per_cluster;
@@ -171,24 +166,95 @@ static bool dir_next(struct FAT12_DirectoryIterator* iter, struct FAT12_Director
     }
 }
 
+static bool find_entry(bool is_root, u16 cluster, const string formatted, struct FAT12_DirectoryEntry* out) {
+    struct FAT12_DirectoryIterator iter;
+    struct FAT12_DirectoryEntry e;
+
+    dir_open(is_root, &iter, cluster);
+    
+    while (dir_next(&iter, &e)) {
+        if (memcmp(e.name, formatted, FILENAME_CHARS) == 0) {
+            *out = e;
+            return true;
+        }
+    }
+    return false;
+}
+
+static bool add_entry(bool is_root, u16 cluster, struct FAT12_DirectoryEntry* entry) {
+    struct FAT12_DirectoryIterator iter;
+    struct FAT12_DirectoryEntry* e;
+    dir_open(is_root, &iter, cluster);
+
+    do {
+        e = (struct FAT12_DirectoryEntry*)(iter.sector_buffer + iter.offset);
+        if (e->name[0] == 0 || e->name[0] == ATTR_REMOVED) {
+            memmove(e, entry, sizeof(struct FAT12_DirectoryEntry));
+            get_driver_ata()->write(iter.sector, (u16*)iter.sector_buffer);
+            return true;
+        }
+    } while (dir_advance(&iter));
+
+    return false;
+}
+
+static bool resolve_path(const string path, struct FAT12_DirectoryEntry* out) {
+    bool is_root = true;
+    u16 cluster = 0;
+
+    char part[12];
+    string p = path;
+
+    while (*p) {
+        string q = part;
+        while (*p && *p != PATH_SEPARATOR) {
+            *q++ = *p++;
+        }
+        *q = 0;
+        if (*p == PATH_SEPARATOR) {
+            p++;
+        }
+
+        char formatted[FILENAME_CHARS];
+        format_filename(part, formatted);
+
+        if (!find_entry(is_root, cluster, formatted, out)) {
+            return false;
+        }
+
+        is_root = false;
+        cluster = out->first_cluster_low;
+    }
+
+    return true;
+}
+
 static i32 read_file_stream(u16 cluster, u8* buffer, u32 bytes) {
     u32 total = 0;
     u32 cluster_size = fs.bpb.sectors_per_cluster * fs.bpb.bytes_per_sector;
-    u8 tmp[cluster_size];
+    u32 base_sector, remaining, to_copy;
+    u8 sector[SECTOR_SIZE];
 
-    while (cluster < END_OF_CHAIN && total < bytes) {
-        u32 to_copy = bytes - total;
-        if (to_copy > cluster_size)
-            to_copy = cluster_size;
+    while (cluster >= 2 && cluster < END_OF_CHAIN && total < bytes) {
+        base_sector = fs.data_start_sector + (cluster - 2) * fs.bpb.sectors_per_cluster;
 
-        read_cluster(cluster, tmp);
-        memcpy(buffer + total, tmp, to_copy);
+        for (u32 s = 0; s < fs.bpb.sectors_per_cluster && total < bytes; s++) {
+            get_driver_ata()->read(base_sector + s, (u16*)sector);
 
-        total += to_copy;
+            remaining = bytes - total;
+            to_copy = remaining < SECTOR_SIZE ? remaining : SECTOR_SIZE;
+
+            memmove(buffer + total, sector, to_copy);
+            total += to_copy;
+        }
+
         cluster = get_next_cluster(cluster);
     }
     return total;
 }
+
+// PUBLIC FUNCTIONS
+// =============================================================================
 
 /*
     -1: file not found
@@ -214,6 +280,69 @@ static i32 read_file(const string filename, u8* buffer, u32 buffer_size) {
 }
 
 /*
+    0: success
+    -1: failed to resolve parent path
+    -2: parent path does not lead to a directory
+    -3: file already exists
+    -4: no free cluster found
+    -5: failed to add entry
+*/
+static i32 create_file(const string filename) {
+    char parent[256], file[256], formatted[FILENAME_CHARS];
+    string p = strchr(filename, PATH_SEPARATOR);
+    struct FAT12_DirectoryEntry dir_parent, new_entry;
+    bool is_root;
+    u16 cluster = 0;
+    u16 free_cluster;
+
+    if (p) {
+        i32 length = p - filename;
+        strncpy(parent, filename, length);
+        parent[length] = 0;
+        strcpy(file, p + 1);
+    } else {
+        strcpy(parent, DIR_ROOT);
+        strcpy(file, filename);
+    }
+
+    is_root = strcmp(parent, DIR_ROOT) == 0;
+    if (!is_root) {
+        if (!resolve_path(parent, &dir_parent)) {
+            return -1;
+        }
+        cluster = dir_parent.first_cluster_low;
+        if (!(dir_parent.attributes & ATTR_DIRECTORY)) {
+            return -2;
+        }
+    }
+
+    format_filename(file, formatted);
+    if (find_entry(is_root, cluster, formatted, &new_entry)) {
+        return -3;
+    }
+
+    free_cluster = find_free_cluster();
+    if (free_cluster == 0) {
+        return -4;
+    }
+
+    memset(&new_entry, 0, sizeof(new_entry));
+    memmove(new_entry.name, formatted, FILENAME_CHARS);
+    new_entry.attributes = 0;
+    new_entry.first_cluster_low = free_cluster;
+    new_entry.file_size = 0;
+
+    if (!add_entry(is_root, cluster, &new_entry)) {
+        return -5;
+    }
+
+    set_cluster_end_of_chain(free_cluster);
+
+    return 0;
+}
+
+/*
+    0: success
     -1: directory not found
     -2: is not a directory
 */
@@ -238,10 +367,10 @@ static i32 read_dir(const string path, string buffer) {
         cluster = dir.first_cluster_low;
     }
 
-    fs.dir_open(is_root, &iter, cluster);
+    dir_open(is_root, &iter, cluster);
 
     out = 0;
-    while (fs.dir_next(&iter, &entry)) {
+    while (dir_next(&iter, &entry)) {
         if (entry.name[0] == ATTR_REMOVED) {
             continue;
         }
@@ -262,17 +391,10 @@ static i32 lookup(const string filename) {
 }
 
 void init_fsdriver_fat12(void) {
-    fs.get_next_cluster = get_next_cluster;
-    fs.read_cluster = read_cluster;
-    fs.find_entry = find_entry;
-    fs.resolve_path = resolve_path;
-    fs.dir_open = dir_open;
-    fs.dir_advance = dir_advance;
-    fs.dir_next = dir_next;
-    fs.read_file_stream = read_file_stream;
     fs.read_file = read_file;
     fs.read_dir = read_dir;
     fs.lookup = lookup;
+    fs.create_file = create_file;
 
     u8 sector[SECTOR_SIZE];
     get_driver_ata()->read(0, (u16*)sector);

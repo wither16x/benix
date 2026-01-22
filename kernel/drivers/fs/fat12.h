@@ -84,17 +84,8 @@ struct DriverFS_FAT12 {
     u32 rootdir_start_sector;
     u32 data_start_sector;
 
-    u16 (*get_next_cluster)(u16 cluster);
-    void (*read_cluster)(u16 cluster, u8* buffer);
-    bool (*find_entry)(bool is_root, u16 cluster, const string formatted, struct FAT12_DirectoryEntry* out);
-    bool (*resolve_path)(const string path, struct FAT12_DirectoryEntry* out);
-
-    void (*dir_open)(bool is_root, struct FAT12_DirectoryIterator* iter, u16 first_cluster);
-    bool (*dir_advance)(struct FAT12_DirectoryIterator* iter);
-    bool (*dir_next)(struct FAT12_DirectoryIterator* iter, struct FAT12_DirectoryEntry* out);
-    i32 (*read_file_stream)(u16 cluster, u8* buffer, u32 bytes);
-
     i32 (*read_file)(const string filename, u8* buffer, u32 buffer_size);
+    i32 (*create_file)(const string filename);
     i32 (*read_dir)(const string path, string buffer);
     i32 (*lookup)(const string filename);
 };

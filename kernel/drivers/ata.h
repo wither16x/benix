@@ -34,6 +34,7 @@
 
 #define ATA_CMD_IDENTIFY            0xec
 #define ATA_CMD_READ                0x20
+#define ATA_CMD_WRITE               0x22
 
 struct DriverATA {
     void (*wait_busy)(void);
@@ -41,6 +42,7 @@ struct DriverATA {
     void (*reset)(void);
     void (*identify)(u16* buffer);
     void (*read)(u32 lba, u16* buffer);
+    void (*write)(u32 lba, const u16* buffer);
 };
 
 void init_driver_ata(void);

@@ -61,12 +61,32 @@ static void read(u32 lba, u16* buffer) {
     }
 }
 
+static void write(u32 lba, const u16* buffer) {
+    ata.wait_busy();
+
+    OUTB(ATA_DRIVE_HEAD, 0xe0 | ((lba >> 24) & 0x0f))
+    OUTB(ATA_SECTOR_COUNT, 1)
+    OUTB(ATA_LBA_LOW, (u8)(lba & 0xff))
+    OUTB(ATA_LBA_MIDDLE, (u8)((lba >> 8) & 0xff))
+    OUTB(ATA_LBA_HIGH, (u8)((lba >> 16) & 0xff))
+    OUTB(ATA_CMD, ATA_CMD_WRITE)
+    ata.wait_busy();
+
+    ata.wait_data_request();
+    for (i32 i = 0; i < SECTOR_SIZE / 2; i++) {
+        OUTW(ATA_DATA, buffer[i])
+    }
+
+    ata.wait_busy();
+}
+
 void init_driver_ata(void) {
     ata.wait_busy = wait_busy;
     ata.wait_data_request = wait_data_request;
     ata.reset = reset;
     ata.identify = identify;
     ata.read = read;
+    ata.write = write;
 }
 
 struct DriverATA* get_driver_ata(void) {

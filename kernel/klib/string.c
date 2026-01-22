@@ -72,3 +72,12 @@ i32 toupper(i32 c) {
     }
     return c;
 }
+
+void strcpy(string dest, string src) {
+    while ((*dest++ = *src++));
+}
+
+void strncpy(string dest, string src, i32 size) {
+    i32 i = 0;
+    while (i++ != size && (*dest++ = *src++));
+}
