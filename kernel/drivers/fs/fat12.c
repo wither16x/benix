@@ -6,7 +6,6 @@
 
 #include "drivers/fs/fat12.h"
 #include "drivers/ata.h"
-#include "klib/logging.h"
 #include "klib/memory.h"
 #include "klib/string.h"
 #include "klib/null.h"
@@ -54,7 +53,6 @@ static u16 find_free_cluster(void) {
         cluster_val = (cluster & 1) ? (val >> 4) & 0xfff : val & 0xfff;
 
         if (cluster_val == 0) {
-            debug("cluster = %d", cluster);
             return cluster;
         }
     }

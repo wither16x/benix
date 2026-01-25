@@ -8,7 +8,7 @@
     - added `limits.h`
 - Userspace:
     - fixed `syscall_fread()`
-    - added program `touch` (doesn't work yet, it will make an endless loop)
+    - added program `touch`
     - replaced syscall 7 (`ffind`) by `fnew`
     - better error handling in user programs
     - added `LICENSE.txt`

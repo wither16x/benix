@@ -75,7 +75,6 @@ static void read(u32 lba, u16* buffer) {
 
 static void write(u32 lba, const u16* buffer)
 {
-    debug("ATA write: lba = %d", lba);
     wait_busy();
 
     OUTB(ATA_DRIVE_HEAD, 0xe0 | ((lba >> 24) & 0x0f))

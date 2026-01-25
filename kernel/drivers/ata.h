@@ -34,7 +34,7 @@
 
 #define ATA_CMD_IDENTIFY            0xec
 #define ATA_CMD_READ                0x20
-#define ATA_CMD_WRITE               0x22
+#define ATA_CMD_WRITE               0x30
 
 struct DriverATA {
     void (*wait_busy)(void);
