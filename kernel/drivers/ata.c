@@ -6,6 +6,7 @@
 
 #include "drivers/ata.h"
 #include "klib/asm.h"
+#include "klib/logging.h"
 
 static struct DriverATA ata;
 
@@ -14,7 +15,18 @@ static void wait_busy(void) {
 }
 
 static void wait_data_request(void) {
-    while (!(__asm_inb(ATA_STATUS) & ATA_DATA_REQUEST));
+    int timeout = 1000000;
+    while (!( __asm_inb(ATA_STATUS) & ATA_DATA_REQUEST )) {
+        if (--timeout == 0) {
+            error("ATA DRQ timeout");
+            u8 status = __asm_inb(ATA_STATUS);
+            if (status & ATA_ERROR) {
+                u8 err = __asm_inb(ATA_ERROR);
+                error("ATA error: status=0x%x, error=0x%x", status, err);
+            }
+            return;
+        }
+    }
 }
 
 static void reset(void) {
@@ -61,23 +73,23 @@ static void read(u32 lba, u16* buffer) {
     }
 }
 
-static void write(u32 lba, const u16* buffer) {
-    ata.wait_busy();
+static void write(u32 lba, const u16* buffer)
+{
+    debug("ATA write: lba = %d", lba);
+    wait_busy();
 
     OUTB(ATA_DRIVE_HEAD, 0xe0 | ((lba >> 24) & 0x0f))
     OUTB(ATA_SECTOR_COUNT, 1)
-    OUTB(ATA_LBA_LOW, (u8)(lba & 0xff))
-    OUTB(ATA_LBA_MIDDLE, (u8)((lba >> 8) & 0xff))
-    OUTB(ATA_LBA_HIGH, (u8)((lba >> 16) & 0xff))
-    OUTB(ATA_CMD, ATA_CMD_WRITE)
-    ata.wait_busy();
+    OUTB(ATA_LBA_LOW,  lba & 0xff)
+    OUTB(ATA_LBA_MIDDLE,  (lba >> 8) & 0xff)
+    OUTB(ATA_LBA_HIGH, (lba >> 16) & 0xff)
+    OUTB(ATA_CMD, ATA_CMD_WRITE);
+    wait_busy();
 
-    ata.wait_data_request();
-    for (i32 i = 0; i < SECTOR_SIZE / 2; i++) {
+    wait_data_request();
+    for (int i = 0; i < 256; i++) {
         OUTW(ATA_DATA, buffer[i])
     }
-
-    ata.wait_busy();
 }
 
 void init_driver_ata(void) {

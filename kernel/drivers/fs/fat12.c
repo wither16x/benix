@@ -6,6 +6,7 @@
 
 #include "drivers/fs/fat12.h"
 #include "drivers/ata.h"
+#include "klib/logging.h"
 #include "klib/memory.h"
 #include "klib/string.h"
 #include "klib/null.h"
@@ -53,6 +54,7 @@ static u16 find_free_cluster(void) {
         cluster_val = (cluster & 1) ? (val >> 4) & 0xfff : val & 0xfff;
 
         if (cluster_val == 0) {
+            debug("cluster = %d", cluster);
             return cluster;
         }
     }
@@ -78,7 +80,7 @@ static u16 get_next_cluster(u16 cluster) {
 static void set_cluster_end_of_chain(u16 cluster) {
     u8 sector[SECTOR_SIZE];
     u32 fat_offset = cluster + cluster / 2;
-    u32 sector_number = fs.fat_start_sector + (fat_offset / SECTOR_SIZE);
+    u32 sector_number = fs.fat_start_sector + (fat_offset / fs.bpb.bytes_per_sector);
     u32 offset = fat_offset % SECTOR_SIZE;
 
     get_driver_ata()->read(sector_number, (u16*)sector);
@@ -392,9 +394,9 @@ static i32 lookup(const string filename) {
 
 void init_fsdriver_fat12(void) {
     fs.read_file = read_file;
+    fs.create_file = create_file;
     fs.read_dir = read_dir;
     fs.lookup = lookup;
-    fs.create_file = create_file;
 
     u8 sector[SECTOR_SIZE];
     get_driver_ata()->read(0, (u16*)sector);
