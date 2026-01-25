@@ -4,6 +4,8 @@
 - General:
     - added `memory_map.txt`
     - improved `.gitignore`
+- Tools:
+    - added `image [path]` subcommand to the installer
 - Benlibc:
     - added `limits.h`
 - Userspace:

@@ -12,14 +12,18 @@ main(args) {
             echo "help                  : display this message"
             echo "version               : display the version of Benix this in"
             echo "                        staller is made for"
-            echo "build                 : build the Benix source code"
+            echo "build [subcmd]        : build the Benix source code"
             echo "emulate [subcmd]      : build and run Benix in an emulator"
         }
         if arg == "version" {
             echo "Installer for Benix version 0.0.3"
         }
         if arg == "build" {
-            build()
+            if args[i + 1] == "image" {
+                build(args[i + 2])
+            } else {
+                build("")
+            }
         }
         if arg == "emulate" {
             if args[i + 1] == "qemu" {

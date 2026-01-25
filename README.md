@@ -21,6 +21,8 @@ Benix is a small 32-bit hobby operating system for x86 I made for fun and learni
 ### Libraries
 - Benlibc (a small libc for userspace programs)
 - Klib (C library embedded in the kernel)
+## Tools
+- Installer (`tools/benix/benix`)
 
 ## Build instructions
 First, you need to clone the git repository. If you don't have git, you can install it from your distribution packages.
@@ -30,6 +32,10 @@ git clone https://github.com/wither16x/benix
 Benix does not use BASH, ZSH or any other standard shell scripting language for its build scripts. Instead, it uses [the Amber programming language](https://github.com/amber-lang/amber). Make sure it is installed on your system and run the following command:
 ```sh
 tools/benix/benix -- build
+```
+You can also build the system on an existing FAT12 image, so it will not be reformated:
+```sh
+tools/benix/benix -- build image path/to/your/image.img
 ```
 **Note:** you should verify the version of the OS you are building first:
 ```sh
@@ -53,6 +59,7 @@ Several programs are provided within the Benix disk image. Their source code is 
 - `show <file>`: displays the content of a file in ASCII
 - `info [option]`: displays informations about the system (these informations are located in `osinfo.txt`)
 - `echo [text]`: displays the given text followed by a newline in the console
+- `touch <file>`: creates a new empty file
 
 ## Documentation
 There is no real documentation. Some of the code has comments, but you still need Assembly and C knowledge to understand what it does if it is not clearly explained or not explained at all...

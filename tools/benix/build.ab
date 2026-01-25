@@ -1,6 +1,6 @@
 import { set_e, mkdir, make, nasm, dd, dd_copy, mkfs_fat, mcopy } from "./utils.ab"
 
-pub fun build() {
+pub fun build(use_image: Text) {
     set_e()
 
     let build_directories = ["binaries", "binaries/user", "binaries/user/bin", "images"]
@@ -26,19 +26,21 @@ pub fun build() {
         nasm("binaries/{f}.bin", "{dir_bootloader}/{f}.asm")
     }
 
-    dd("/dev/zero", "images/benix.img", 512, 2880)
-    mkfs_fat(12, "images/benix.img")
+    if (use_image == "") {
+        dd("/dev/zero", "images/benix.img", 512, 2880)
+        mkfs_fat(12, "images/benix.img")
 
-    dd_copy("binaries/bootsect.bin", "images/benix.img", 0)
-    dd_copy("binaries/stage2.bin", "images/benix.img", 1)
-    dd_copy("binaries/kernel.bin", "images/benix.img", 2)
+        dd_copy("binaries/bootsect.bin", "images/benix.img", 0)
+        dd_copy("binaries/stage2.bin", "images/benix.img", 1)
+        dd_copy("binaries/kernel.bin", "images/benix.img", 2)
 
-    mcopy("images/benix.img", "{dir_user}/README.txt", "::")
-    mcopy("images/benix.img", "{dir_user}/LICENSE.txt", "::")
-    mcopy("images/benix.img", "{dir_user}/sys", "::")
-    mcopy("images/benix.img", "binaries/user/bin", "::")
+        mcopy("images/benix.img", "{dir_user}/README.txt", "::")
+        mcopy("images/benix.img", "{dir_user}/LICENSE.txt", "::")
+        mcopy("images/benix.img", "{dir_user}/sys", "::")
+        mcopy("images/benix.img", "binaries/user/bin", "::")
+    }
 }
 
 main(args) {
-    build()
+    build(args[0])
 }

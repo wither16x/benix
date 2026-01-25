@@ -1,7 +1,7 @@
 import { build } from "./build.ab"
 
 pub fun run(args: [Text]) {
-    build()
+    build(args[0])
 
     for arg in args {
         if arg == "qemu" {
