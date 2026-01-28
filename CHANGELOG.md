@@ -10,14 +10,15 @@
     - added `limits.h`
 - Userspace:
     - fixed `syscall_fread()`
-    - added program `touch`
-    - replaced syscall 7 (`ffind`) by `fnew`
+    - added programs: `touch` and `write`
+    - replaced syscall 7 (`ffind`) by `fnew` and added syscall 8 (`fwrite`)
     - better error handling in user programs
     - added `LICENSE.txt`
     - reorganized files and directories
     - edited `README.txt`
 - Drivers:
     - FAT12:
+        - supports file creation and writing in files
         - cleaned up API
         - big refactorisation
         - subdirectories support

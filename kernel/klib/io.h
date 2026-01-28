@@ -33,8 +33,10 @@ void getstr(string buf);
 // convert an integer value to a null-terminated string
 void itoa(i32 i, string buffer, i32 base);
 
-// read bytes from a file from the disk and stores its content in a buffer
+// read bytes from a file and store its content in a buffer
 i32 fread(const string path, u8* buffer, u32 size);
+// write bytes from a buffer into a file
+i32 fwrite(const string path, const u8* buffer, u32 size);
 // read the entries of a directory and store them in a buffer
 // the entries are separated by newlines
 i32 lsdir(const string path, string buffer);

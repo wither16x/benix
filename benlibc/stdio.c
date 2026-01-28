@@ -2,6 +2,7 @@
 #include "syscall.h"
 #include "stdlib.h"
 #include "limits.h"
+#include <stdio.h>
 
 void putchar(int c) {
     if (c) {
@@ -210,4 +211,8 @@ void input(char *buf) {
 
 int fread(const char* path, char *buf, int size) {
     return syscall_fread((char*)path, buf, size);
+}
+
+int fwrite(const char* path, const char* buffer, int size) {
+    return syscall_fwrite((char*)path, (char*)buffer, size);
 }

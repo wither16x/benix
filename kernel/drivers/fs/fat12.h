@@ -78,6 +78,11 @@ struct FAT12_DirectoryIterator {
     u8 sector_buffer[SECTOR_SIZE];
 };
 
+struct FAT12_PathHandle {
+    struct FAT12_DirectoryEntry entry;
+    struct FAT12_DirectoryIterator iterator;
+};
+
 struct DriverFS_FAT12 {
     struct FAT12_BPB bpb;
     u32 fat_start_sector;
@@ -85,6 +90,7 @@ struct DriverFS_FAT12 {
     u32 data_start_sector;
 
     i32 (*read_file)(const string filename, u8* buffer, u32 buffer_size);
+    i32 (*write_file)(const string filename, const u8* buffer, u32 buffer_size);
     i32 (*create_file)(const string filename);
     i32 (*read_dir)(const string path, string buffer);
     i32 (*lookup)(const string filename);

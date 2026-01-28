@@ -31,24 +31,24 @@ git clone https://github.com/wither16x/benix
 ```
 Benix does not use BASH, ZSH or any other standard shell scripting language for its build scripts. Instead, it uses [the Amber programming language](https://github.com/amber-lang/amber). Make sure it is installed on your system and run the following command:
 ```sh
-tools/benix/benix -- build
+tools/benix-installer/run -- build
 ```
 You can also build the system on an existing FAT12 image, so it will not be reformated:
 ```sh
-tools/benix/benix -- build image path/to/your/image.img
+tools/benix-installer/run -- build image path/to/your/image.img
 ```
 **Note:** you should verify the version of the OS you are building first:
 ```sh
-tools/benix/benix -- version
+tools/benix-installer/run -- version
 ```
 Now, a floppy image should be available as `images/benix.img`.
 If you have `qemu` and you want to try Benix on it, execute the command below:
 ```sh
-tools/benix/benix -- emulate qemu
+tools/benix-installer/run -- emulate qemu
 ```
 **Note**: if you need more informations about the Benix installer, run this command:
 ```sh
-tools/benix/benix -- help
+tools/benix-installer/run -- help
 ```
 **Benix has not been tried on real hardware yet!**
 

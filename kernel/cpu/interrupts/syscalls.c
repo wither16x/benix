@@ -10,6 +10,7 @@
     5: read directory content (lsdir)
     6: read character from keyboard (readchar)
     7: create file (fnew)
+    8: write file (fwrite)
 
     Bad syscall: EAX = -1
 */
@@ -41,6 +42,10 @@ void syscall_handler(struct SyscallRegisters* r) {
 
         case 7:
             r->eax = fnew((string)r->ebx);
+            break;
+
+        case 8:
+            r->eax = fwrite((string)r->ebx, (u8*)r->ecx, r->edx);
             break;
 
         default:

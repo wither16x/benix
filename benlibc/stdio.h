@@ -13,3 +13,4 @@ void snprintf(char* buf, int len, char* fmt, ...);
 int getchar();
 void input(char* buf);
 int fread(const char* path, char* buf, int size);
+int fwrite(const char* path, const char* buf, int size);
