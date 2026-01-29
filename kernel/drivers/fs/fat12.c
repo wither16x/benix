@@ -35,11 +35,41 @@ static void format_filename(const string input, string out) {
     }
 }
 
+static void write_entry(u16 cluster, u16 value) {
+    u32 fat_offset = cluster + cluster / 2;
+    u32 fat_base, sector, offset;
+    u8 buffer[SECTOR_SIZE];
+    u16 current;
+
+    for (u32 fat = 0; fat < fs.bpb.number_of_fats; fat++) {
+        fat_base = fs.fat_start_sector + fat * fs.bpb.fat_size;
+        sector = fat_base + (fat_offset / fs.bpb.bytes_per_sector);
+        offset = fat_offset % fs.bpb.bytes_per_sector;
+        get_driver_ata()->read(sector, (u16*)buffer);
+        current = *(u16*)(buffer + offset);
+
+        if (cluster & 1) {
+            current = (current & 0xf) | (value << 4);
+        } else {
+            current = (current & 0xf000) | (value & 0xfff);
+        }
+
+        *(u16*)(buffer + offset) = current;
+        get_driver_ata()->write(sector, (u16*)buffer);
+    }
+}
+
+/*
+    This function ignores FAT copies since we can consider the first FAT as canonical.
+    However this will probably be changed in the future.
+*/
 static u16 find_free_cluster(void) {
     u8 sector[SECTOR_SIZE];
     u16 val, cluster_val;
     u32 fat_size = fs.bpb.fat_size;
-    u32 clusters = fs.bpb.total_sectors16 / fs.bpb.sectors_per_cluster;
+    u32 rootdir_sectors = ((fs.bpb.rootdir_entry_count * ENTRY_SIZE) + fs.bpb.bytes_per_sector - 1) / fs.bpb.bytes_per_sector;
+    u32 data_sectors = fs.bpb.total_sectors16 - (fs.bpb.reserved_sector_count + fs.bpb.number_of_fats * fs.bpb.fat_size + rootdir_sectors);
+    u32 clusters = data_sectors / fs.bpb.sectors_per_cluster + 2;
     u32 fat_offset, sectorno, offset;
 
     for (u32 cluster = 2; cluster < clusters; cluster++) {
@@ -76,42 +106,11 @@ static u16 get_next_cluster(u16 cluster) {
 }
 
 static void set_cluster_end_of_chain(u16 cluster) {
-    u8 sector[SECTOR_SIZE];
-    u32 fat_offset = cluster + cluster / 2;
-    u32 sector_number = fs.fat_start_sector + (fat_offset / fs.bpb.bytes_per_sector);
-    u32 offset = fat_offset % SECTOR_SIZE;
-
-    get_driver_ata()->read(sector_number, (u16*)sector);
-
-    u16 value = *(u16*)(sector + offset);
-    if (cluster & 1) {
-        value = (value & 0xf) | (0xfff << 4);
-    } else {
-        value = (value & 0xf000) | 0xfff;
-    }
-
-    *(u16*)(sector + offset) = value;
-    get_driver_ata()->write(sector_number, (u16*)sector);
+    write_entry(cluster, END_OF_CHAIN);
 }
 
 static void set_cluster_next(u16 cluster, u16 next) {
-    u8 sector[SECTOR_SIZE];
-    u16 value;
-    u32 fat_offset = cluster + cluster / 2;
-    u32 sectorno = fs.fat_start_sector + (fat_offset / fs.bpb.bytes_per_sector);
-    u32 offset = fat_offset % fs.bpb.bytes_per_sector;
-
-    get_driver_ata()->read(sectorno, (u16*)sector);
-    value = *(u16*)(sector + offset);
-
-    if (cluster & 1) {
-        value = (value & 0xf) | (next << 4);
-    } else {
-        value = (value & 0xf000) | (next & 0xfff);
-    }
-
-    *(u16*)(sector + offset) = value;
-    get_driver_ata()->write(sectorno, (u16*)sector);
+    write_entry(cluster, next);
 }
 
 static void read_cluster(u16 cluster, u8* buffer) {
@@ -248,7 +247,7 @@ static bool resolve_path(const string path, struct FAT12_DirectoryEntry* out) {
         char formatted[FILENAME_CHARS];
         format_filename(part, formatted);
 
-        if (!find_entry(is_root, cluster, formatted, out)) {
+        if (!find_entry(is_root, cluster, formatted, out) || (*p && !(out->attributes & ATTR_DIRECTORY))) {
             return false;
         }
 
@@ -271,6 +270,7 @@ static bool resolve_path_handle(const string path, struct FAT12_PathHandle* out)
     struct FAT12_DirectoryEntry entry;
 
     while (*p) {
+        found = false;
         q = part;
 
         while (*p && *p != PATH_SEPARATOR) {
@@ -292,6 +292,11 @@ static bool resolve_path_handle(const string path, struct FAT12_PathHandle* out)
                 is_root = false;
                 cluster = entry.first_cluster_low;
                 found = true;
+
+                if (*p && !(entry.attributes & ATTR_DIRECTORY)) {
+                    return false;
+                }
+
                 break;
             }
         }

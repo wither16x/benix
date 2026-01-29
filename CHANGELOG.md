@@ -1,6 +1,6 @@
 # Benix changelog
 
-## Version 0.0.3 (UNFINISHED)
+## Version 0.0.3
 - General:
     - added `memory_map.txt`
     - improved `.gitignore`
@@ -18,6 +18,7 @@
     - edited `README.txt`
 - Drivers:
     - FAT12:
+        - FATs are synchronized
         - supports removing files and directories
         - supports file and directory creation and writing in files
         - cleaned up API
