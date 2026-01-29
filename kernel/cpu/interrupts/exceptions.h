@@ -9,6 +9,9 @@
 
 #include "klib/types.h"
 
+/*
+    State of the CPU before calling the exception handler
+*/
 struct CPUState {
     u32 gs;
     u32 fs;
@@ -31,5 +34,6 @@ struct CPUState {
     u32 ss;
 } pt_regs_t;
 
+// Handle CPU exceptions
 __attribute__((noreturn))
 void exception_handler(struct CPUState* cpu_state);

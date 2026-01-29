@@ -547,10 +547,10 @@ static i32 create_dir(const string dirname) {
         return -4;
     }
 
-    memmove(dot->name, ".          ", FILENAME_CHARS);
+    memmove(dot->name, DIR_CURRENT, FILENAME_CHARS);
     dot->attributes = ATTR_DIRECTORY;
     dot->first_cluster_low = free_cluster;
-    memmove(dot2->name, "..         ", FILENAME_CHARS);
+    memmove(dot2->name, DIR_PARENT, FILENAME_CHARS);
     dot2->attributes = ATTR_DIRECTORY;
     dot2->first_cluster_low = is_root ? 0 : parent_cluster;
 
@@ -595,6 +595,48 @@ static i32 remove_file(const string filename) {
     }
 
     handle.entry.name[0] = ATTR_REMOVED;
+    get_driver_ata()->read(handle.iterator.sector, (u16*)sector);
+    memmove(sector + handle.iterator.offset, &handle.entry, sizeof(handle.entry));
+    get_driver_ata()->write(handle.iterator.sector, (u16*)sector);
+
+    return 0;
+}
+
+/*
+    0: success
+    -1: tried to remove /
+    -2: directory not found
+    -3: is not a directory
+    -4: directory not empty
+*/
+static i32 remove_dir(const string dirname) {
+    struct FAT12_PathHandle handle;
+    struct FAT12_DirectoryIterator iter;
+    struct FAT12_DirectoryEntry entry;
+    u8 sector[SECTOR_SIZE];
+
+    if (strcmp(dirname, DIR_ROOT) == 0) {
+        return -1;
+    }
+    if (!resolve_path_handle(dirname, &handle)) {
+        return -2;
+    }
+    if (!(handle.entry.attributes & ATTR_DIRECTORY)) {
+        return -3;
+    }
+
+    dir_open(false, &iter, handle.entry.first_cluster_low);
+    while (dir_next(&iter, &entry)) {
+        if (entry.name[0] == ATTR_REMOVED || !memcmp(entry.name, DIR_CURRENT, FILENAME_CHARS) || !memcmp(entry.name, DIR_PARENT, FILENAME_CHARS)) {
+            continue;
+        }
+
+        return -4;
+    }
+
+    free_cluster_chain(handle.entry.first_cluster_low);
+    handle.entry.name[0] = ATTR_REMOVED;
+
     get_driver_ata()->read(handle.iterator.sector, (u16*)sector);
     memmove(sector + handle.iterator.offset, &handle.entry, sizeof(handle.entry));
     get_driver_ata()->write(handle.iterator.sector, (u16*)sector);
@@ -657,6 +699,7 @@ void init_fsdriver_fat12(void) {
     fs.create_file = create_file;
     fs.create_dir = create_dir;
     fs.remove_file = remove_file;
+    fs.remove_dir = remove_dir;
     fs.read_dir = read_dir;
     fs.lookup = lookup;
 

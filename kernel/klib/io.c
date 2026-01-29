@@ -268,3 +268,7 @@ i32 dirnew(string path) {
 i32 frem(string path) {
     return get_fsdriver_fat12()->remove_file(path);
 }
+
+i32 dirrem(string path) {
+    return get_fsdriver_fat12()->remove_dir(path);
+}

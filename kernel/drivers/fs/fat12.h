@@ -25,7 +25,10 @@
 #define ATTR_LFN                        (ATTR_READ_ONLY | ATTR_HIDDEN | ATTR_SYSTEM | ATTR_VOLUME_ID)
 
 #define PATH_SEPARATOR                  '/'
+
 #define DIR_ROOT                        "/"
+#define DIR_CURRENT                     ".          "
+#define DIR_PARENT                      "..         "
 
 #define END_OF_CHAIN                    0xff8
 
@@ -94,6 +97,7 @@ struct DriverFS_FAT12 {
     i32 (*create_file)(const string filename);
     i32 (*create_dir)(const string dirname);
     i32 (*remove_file)(const string filename);
+    i32 (*remove_dir)(const string dirname);
     i32 (*read_dir)(const string path, string buffer);
     i32 (*lookup)(const string filename);
 };

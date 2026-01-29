@@ -48,3 +48,5 @@ i32 fnew(string path);
 i32 dirnew(string path);
 // remove file
 i32 frem(string path);
+// remove directory
+i32 dirrem(string path);
