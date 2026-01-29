@@ -264,3 +264,7 @@ i32 fnew(string path) {
 i32 dirnew(string path) {
     return get_fsdriver_fat12()->create_dir(path);
 }
+
+i32 frem(string path) {
+    return get_fsdriver_fat12()->remove_file(path);
+}

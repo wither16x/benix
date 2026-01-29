@@ -9,15 +9,16 @@
 - Benlibc:
     - added `limits.h`
 - Userspace:
-    - added programs: `touch`, `write` and `mkdir`
-    - replaced syscall 7 (`ffind`) by `fnew` and added syscall 8 (`fwrite`)
-      and syscall 9 (`dirnew`), fixed `syscall_fread()`
+    - added programs: `touch`, `write`, `mkdir`, `rm`
+    - replaced syscall 7 (`ffind`) by `fnew`, added syscalls: 8 (`fwrite`),
+      9 (`dirnew`), 10 (`frem`) fixed `syscall_fread()`
     - better error handling in user programs
     - added `LICENSE.txt`
     - reorganized files and directories
     - edited `README.txt`
 - Drivers:
     - FAT12:
+        - supports removing files
         - supports file and directory creation and writing in files
         - cleaned up API
         - big refactorisation

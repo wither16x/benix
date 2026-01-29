@@ -28,7 +28,7 @@ void main() {
                     break;
 
                 case -1:
-                    printf("Path is not valid\n");
+                    printf("Directory not found: %s\n", argv[i]);
                     break;
 
                 case -2:
@@ -36,7 +36,7 @@ void main() {
                     break;
 
                 case -3:
-                    printf("This directory already exists\n");
+                    printf("Already exists: %s\n", argv[i]);
                     break;
 
                 case -4:

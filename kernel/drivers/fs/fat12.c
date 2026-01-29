@@ -576,6 +576,34 @@ static i32 create_dir(const string dirname) {
 
 /*
     0: success
+    -1: file not found
+    -2: is a directory
+*/
+static i32 remove_file(const string filename) {
+    struct FAT12_PathHandle handle;
+    u8 sector[SECTOR_SIZE];
+
+    if (!resolve_path_handle(filename, &handle)) {
+        return -1;
+    }
+    if (handle.entry.attributes & ATTR_DIRECTORY) {
+        return -2;
+    }
+
+    if (handle.entry.first_cluster_low) {
+        free_cluster_chain(handle.entry.first_cluster_low);
+    }
+
+    handle.entry.name[0] = ATTR_REMOVED;
+    get_driver_ata()->read(handle.iterator.sector, (u16*)sector);
+    memmove(sector + handle.iterator.offset, &handle.entry, sizeof(handle.entry));
+    get_driver_ata()->write(handle.iterator.sector, (u16*)sector);
+
+    return 0;
+}
+
+/*
+    0: success
     -1: directory not found
     -2: is not a directory
 */
@@ -628,6 +656,7 @@ void init_fsdriver_fat12(void) {
     fs.write_file = write_file;
     fs.create_file = create_file;
     fs.create_dir = create_dir;
+    fs.remove_file = remove_file;
     fs.read_dir = read_dir;
     fs.lookup = lookup;
 

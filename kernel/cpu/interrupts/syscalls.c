@@ -12,6 +12,7 @@
     7: create file (fnew)
     8: write file (fwrite)
     9: create dir (dirnew)
+    10: remove file (frem)
 
     Bad syscall: EAX = -1
 */
@@ -51,6 +52,10 @@ void syscall_handler(struct SyscallRegisters* r) {
 
         case 9:
             r->eax = dirnew((string)r->ebx);
+            break;
+
+        case 10:
+            r->eax = frem((string)r->ebx);
             break;
 
         default:

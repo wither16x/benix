@@ -62,6 +62,7 @@ Several programs are provided within the Benix disk image. Their source code is 
 - `touch <file>`: creates a new empty file
 - `write <file>`: writes text in a file
 - `mkdir <dir>`: creates a new directory
+- `rm <file>`: removes a file
 
 ## Documentation
 There is no real documentation. Some of the code has comments, but you still need Assembly and C knowledge to understand what it does if it is not clearly explained or not explained at all...

@@ -10,7 +10,7 @@ pub fun build(use_image: Text) {
     let dir_benlibc = "benlibc"
     let dir_user = "user"
     let user_programs = ["bin/ls", "bin/cash", "bin/echo", "bin/info", "bin/show", "bin/touch", "bin/write",
-                         "bin/mkdir"]
+                         "bin/mkdir", "bin/rm"]
 
     for d in build_directories {
         mkdir(d)
@@ -38,6 +38,7 @@ pub fun build(use_image: Text) {
         mcopy("images/benix.img", "{dir_user}/README.txt", "::")
         mcopy("images/benix.img", "{dir_user}/LICENSE.txt", "::")
         mcopy("images/benix.img", "{dir_user}/sys", "::")
+        mcopy("images/benix.img", "{dir_user}/home", "::")
         mcopy("images/benix.img", "binaries/user/bin", "::")
     }
 }

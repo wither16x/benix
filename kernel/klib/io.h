@@ -46,3 +46,5 @@ i32 findfile(string path);
 i32 fnew(string path);
 // create directory
 i32 dirnew(string path);
+// remove file
+i32 frem(string path);
