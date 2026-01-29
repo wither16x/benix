@@ -1,8 +1,6 @@
 import { build } from "./build.ab"
 
 pub fun run(args: [Text]) {
-    build(args[0])
-
     for arg in args {
         if arg == "qemu" {
             $ qemu-system-i386 -drive format=raw,file=images/benix.img -m 512M $

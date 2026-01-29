@@ -9,7 +9,8 @@ pub fun build(use_image: Text) {
     let dir_kernel = "kernel"
     let dir_benlibc = "benlibc"
     let dir_user = "user"
-    let user_programs = ["bin/ls", "bin/cash", "bin/echo", "bin/info", "bin/show", "bin/touch", "bin/write"]
+    let user_programs = ["bin/ls", "bin/cash", "bin/echo", "bin/info", "bin/show", "bin/touch", "bin/write",
+                         "bin/mkdir"]
 
     for d in build_directories {
         mkdir(d)

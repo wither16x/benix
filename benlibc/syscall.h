@@ -8,3 +8,4 @@ int syscall_lsdir(char* path, char* buf);
 int syscall_getchar(void);
 int syscall_fnew(char* path);
 int syscall_fwrite(char* path, char* buf, int size);
+int syscall_dirnew(char* path);

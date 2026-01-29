@@ -5,6 +5,7 @@
 */
 
 #include "klib/string.h"
+#include "klib/bool.h"
 #include "klib/null.h"
 
 u32 strlen(string s) {
@@ -24,6 +25,19 @@ string strchr(string s, i32 c) {
     }
 
     return NULL;
+}
+
+string strrchr(string s, i32 c) {
+    string p = NULL;
+
+    while (true) {
+        if (*s == (char)c) {
+            p = s;
+        }
+        if (*s++ == '\0') {
+            return (string)p;
+        }
+    }
 }
 
 string strtok(string s, const string delim) {

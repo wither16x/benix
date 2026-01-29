@@ -12,6 +12,8 @@
 u32 strlen(string s);
 // Find the first occurence of a character in a string
 string strchr(string s, i32 c);
+// Find the last occurence of a character in a string
+string strrchr(string s, i32 c);
 // Tokenize a string
 string strtok(string s, const string delim);
 // Compare two strings

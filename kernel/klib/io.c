@@ -260,3 +260,7 @@ i32 findfile(string path) {
 i32 fnew(string path) {
     return get_fsdriver_fat12()->create_file(path);
 }
+
+i32 dirnew(string path) {
+    return get_fsdriver_fat12()->create_dir(path);
+}

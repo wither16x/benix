@@ -9,24 +9,23 @@
 - Benlibc:
     - added `limits.h`
 - Userspace:
-    - fixed `syscall_fread()`
-    - added programs: `touch` and `write`
+    - added programs: `touch`, `write` and `mkdir`
     - replaced syscall 7 (`ffind`) by `fnew` and added syscall 8 (`fwrite`)
+      and syscall 9 (`dirnew`), fixed `syscall_fread()`
     - better error handling in user programs
     - added `LICENSE.txt`
     - reorganized files and directories
     - edited `README.txt`
 - Drivers:
     - FAT12:
-        - supports file creation and writing in files
+        - supports file and directory creation and writing in files
         - cleaned up API
         - big refactorisation
         - subdirectories support
     - VGA driver supports scrollup
 - Klib:
-    - fixed `__asm_outw()` (stupid error, I used `outb` instead of `outw` lol)
-    - added `strncpy()`
-    - added `strcpy()`
+    - fixed `__asm_outw()` (stupid error, I was using `outb` instead of `outw`)
+    - added `strncpy()`, `strcpy()` and `strrchr()`
 - Bootloader:
     - cleaned up `gdt.asm`
 - Build:

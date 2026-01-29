@@ -5,21 +5,34 @@
 
 void main() {
     benix_GetCLIArgs();
-    char buffer[1024];
 
-    if (strcmp(argv[1], CMD_HELP_SHORT) == 0 || strcmp(argv[1], CMD_HELP_LONG) == 0) {
-        printf("write -- writes text into a file\n");
-        printf("usage: write <filename> <text>\n");
-        printf("-h / --help                 : display this message\n");
-        return;
-    }
+    char buffer[1024];
+    int result;
 
     if (argc < 2) {
         printf("Filename required\n");
         return;
     }
 
-    input(buffer);
+    for (int i = 1; i < argc; i++) {
+        if (strcmp(argv[i], CMD_HELP_SHORT) == 0 || strcmp(argv[i], CMD_HELP_LONG) == 0) {
+            printf("write -- writes text into a file\n");
+            printf("usage: write <filename>/[options]\n");
+            printf("-h / --help                 : display this message\n");
+            continue;
+        }
 
-    fwrite(argv[1], buffer, sizeof(buffer));
+        else {
+            input(buffer);
+            result = fwrite(argv[i], buffer, strlen(buffer));
+
+            if (result == -1) {
+                printf("File not found: %s\n", argv[i]);
+            } else if (result == -2) {
+                printf("Is a directory: %s\n", argv[i]);
+            } else if (result == -3) {
+                printf("Failed to write in %s\n", argv[i]);
+            }
+        }
+    }
 }

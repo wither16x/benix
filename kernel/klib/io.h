@@ -44,3 +44,5 @@ i32 lsdir(const string path, string buffer);
 i32 findfile(string path);
 // create file
 i32 fnew(string path);
+// create directory
+i32 dirnew(string path);

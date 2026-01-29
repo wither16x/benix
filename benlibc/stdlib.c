@@ -36,3 +36,34 @@ void itoa(int i, char* buffer, int base) {
         *end-- = tmp;
     }
 }
+
+int atoi(char *s) {
+    int length = 0;
+    int negative_count = 0;
+    int count = 0;
+    int number = 0;
+
+    while (s[length] != '\0') {
+        length++;
+    }
+
+    while (count < length) {
+        if (s[count] == '-') {
+            negative_count++;
+        }
+
+        if (s[count] >= 48 && s[count] <= 57) {
+            for (; s[count] >= 48 && s[count] <= 57; count++) {
+                number = 10 * number - (s[count] - 48);
+            }
+            break;
+        }
+        count++;
+    }
+
+    if (negative_count % 2 != 0) {
+        return number;
+    } else {
+        return -number;
+    }
+}

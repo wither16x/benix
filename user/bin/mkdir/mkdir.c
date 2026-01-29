@@ -1,7 +1,7 @@
-#include "touch.h"
-#include <syscall.h>
+#include "mkdir.h"
 #include <cli.h>
 #include <stdio.h>
+#include <syscall.h>
 #include <string.h>
 
 void main() {
@@ -10,19 +10,19 @@ void main() {
     int result;
 
     if (argc < 2) {
-        printf("Missing filename\n");
+        printf("Missing directory name\n");
         return;
     }
 
     for (int i = 1; i < argc; i++) {
         if (strcmp(argv[i], CMD_HELP_SHORT) == 0 || strcmp(argv[i], CMD_HELP_LONG) == 0) {
-            printf("touch -- creates an empty file\n");
-            printf("usage: touch <filename>\n");
+            printf("mkdir -- creates a new directory\n");
+            printf("usage: mkdir <dirname>\n");
             printf("-h / --help                 : display this message\n");
         }
 
         else {
-            result = syscall_fnew(argv[i]);
+            result = syscall_dirnew(argv[i]);
             switch (result) {
                 case 0:
                     break;
@@ -36,7 +36,7 @@ void main() {
                     break;
 
                 case -3:
-                    printf("This file already exists\n");
+                    printf("This directory already exists\n");
                     break;
 
                 case -4:

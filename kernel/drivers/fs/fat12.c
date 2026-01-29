@@ -441,7 +441,7 @@ static i32 write_file(const string filename, const u8* buffer, u32 buffer_size) 
 */
 static i32 create_file(const string filename) {
     char parent[256], file[256], formatted[FILENAME_CHARS];
-    string p = strchr(filename, PATH_SEPARATOR);
+    string p = strrchr(filename, PATH_SEPARATOR);
     struct FAT12_DirectoryEntry dir_parent, new_entry;
     bool is_root;
     u16 cluster = 0;
@@ -485,6 +485,87 @@ static i32 create_file(const string filename) {
     new_entry.file_size = 0;
 
     if (!add_entry(is_root, cluster, &new_entry)) {
+        return -5;
+    }
+
+    set_cluster_end_of_chain(free_cluster);
+
+    return 0;
+}
+
+/*
+    0: success
+    -1: failed to resolve parent path
+    -2: parent path does not lead to a directory
+    -3: file already exists
+    -4: no free cluster found
+    -5: failed to add entry
+*/
+static i32 create_dir(const string dirname) {
+    char parent[256], name[256], formatted[FILENAME_CHARS];
+    string p = strrchr(dirname, PATH_SEPARATOR);
+    struct FAT12_DirectoryEntry parent_dir, new_entry;
+    bool is_root;
+    u16 parent_cluster = 0;
+    u16 free_cluster;
+    i32 length;
+    u32 base;
+    u8 buffer[SECTOR_SIZE * fs.bpb.sectors_per_cluster];
+    memset(buffer, 0, sizeof(buffer));
+    struct FAT12_DirectoryEntry* dot = (voidptr)buffer;
+    struct FAT12_DirectoryEntry* dot2 = dot + 1;
+    memset(dot, 0, sizeof(*dot));
+    memset(dot2, 0, sizeof(*dot2));
+
+    if (p) {
+        length = p - dirname;
+        strncpy(parent, dirname, length);
+        parent[length] = 0;
+        strcpy(name, p + 1);
+    } else {
+        strcpy(parent, DIR_ROOT);
+        strcpy(name, dirname);
+    }
+
+    is_root = strcmp(parent, DIR_ROOT) == 0;
+    if (!is_root) {
+        if (!resolve_path(parent, &parent_dir)) {
+            return -1;
+        }
+        if (!(parent_dir.attributes & ATTR_DIRECTORY)) {
+            return -2;
+        }
+        parent_cluster = parent_dir.first_cluster_low;
+    }
+
+    format_filename(name, formatted);
+    if (find_entry(is_root, parent_cluster, formatted, &new_entry)) {
+        return -3;
+    }
+    free_cluster = find_free_cluster();
+    if (!free_cluster) {
+        return -4;
+    }
+
+    memmove(dot->name, ".          ", FILENAME_CHARS);
+    dot->attributes = ATTR_DIRECTORY;
+    dot->first_cluster_low = free_cluster;
+    memmove(dot2->name, "..         ", FILENAME_CHARS);
+    dot2->attributes = ATTR_DIRECTORY;
+    dot2->first_cluster_low = is_root ? 0 : parent_cluster;
+
+    base = fs.data_start_sector + (free_cluster - 2) * fs.bpb.sectors_per_cluster;
+
+    for (u32 i = 0; i < fs.bpb.sectors_per_cluster; i++) {
+        get_driver_ata()->write(base + i, (u16*)(buffer + i * SECTOR_SIZE));
+    }
+
+    memset(&new_entry, 0, sizeof(new_entry));
+    memmove(new_entry.name, formatted, FILENAME_CHARS);
+    new_entry.attributes = ATTR_DIRECTORY;
+    new_entry.first_cluster_low = free_cluster;
+
+    if (!add_entry(is_root, parent_cluster, &new_entry)) {
         return -5;
     }
 
@@ -546,12 +627,13 @@ void init_fsdriver_fat12(void) {
     fs.read_file = read_file;
     fs.write_file = write_file;
     fs.create_file = create_file;
+    fs.create_dir = create_dir;
     fs.read_dir = read_dir;
     fs.lookup = lookup;
 
     u8 sector[SECTOR_SIZE];
     get_driver_ata()->read(0, (u16*)sector);
-    memcpy(&fs.bpb, sector, sizeof(fs.bpb));
+    memmove(&fs.bpb, sector, sizeof(fs.bpb));
 
     fs.fat_start_sector = fs.bpb.reserved_sector_count;
     fs.rootdir_start_sector = fs.fat_start_sector + fs.bpb.number_of_fats * fs.bpb.fat_size;

@@ -8,25 +8,29 @@ void main() {
     benix_GetCLIArgs();
 
     char buffer[512 * 10];
+    int result;
 
     if (argc < 2) {
         printf("Filename required\n");
         return;
     }
 
-    if (strcmp(argv[1], CMD_HELP_SHORT) == 0 || strcmp(argv[1], CMD_HELP_LONG) == 0) {
-        printf("show -- displays the content of a file in ASCII\n");
-        printf("Usage: show <filename>\n");
-        printf("-h / --help                 : display this message\n");
-        return;
-    }
+    for (int i = 1; i < argc; i++) {
+        if (strcmp(argv[i], CMD_HELP_SHORT) == 0 || strcmp(argv[i], CMD_HELP_LONG) == 0) {
+            printf("show -- displays the content of a file in ASCII\n");
+            printf("Usage: show <filename>\n");
+            printf("-h / --help                 : display this message\n");
+        }
 
-    int result = fread(argv[1], buffer, sizeof(buffer));
-    if (result == -1) {
-        printf("File not found: %s\n", argv[1]);
-    } else if (result == -2) {
-        printf("Is a directory: %s\n", argv[1]);
-    } else {
-        printf("%s", buffer);
+        else {
+            result = fread(argv[i], buffer, sizeof(buffer));
+            if (result == -1) {
+                printf("File not found: %s\n", argv[i]);
+            } else if (result == -2) {
+                printf("Is a directory: %s\n", argv[i]);
+            } else {
+                printf("%s", buffer);
+            }
+        }
     }
 }
