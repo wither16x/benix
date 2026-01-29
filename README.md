@@ -22,7 +22,7 @@ Benix is a small 32-bit hobby operating system for x86 I made for fun and learni
 - Benlibc (a small libc for userspace programs)
 - Klib (C library embedded in the kernel)
 ## Tools
-- Installer (`tools/benix/benix`)
+- Installer (`tools/benix-installer/`)
 
 ## Build instructions
 First, you need to clone the git repository. If you don't have git, you can install it from your distribution packages.
