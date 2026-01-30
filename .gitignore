@@ -19,3 +19,6 @@ compile_commands.json
 *.img
 *.hdd
 *.iso
+
+# Notes
+TODO.md

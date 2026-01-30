@@ -23,7 +23,7 @@ void kmain(void) {
     STI
 
     // switch to usermode
-    enter_usermode(0x90000);
+    enter_usermode(0x210000);
 
     // loop on HLT to save power
     while (true) {

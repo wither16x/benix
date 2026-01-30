@@ -6,7 +6,7 @@ static struct TSS tss;
 void init_tss(void) {
     tss.debug_flag = 0;
     tss.io_map = 0;
-    tss.esp0 = 0x80000;
+    tss.esp0 = 0x180000;
     tss.ss0 = 0x10;
 
     get_gdt()->set_entry(5, (u32)&tss, sizeof(struct TSS) - 1, 0x89, 0);

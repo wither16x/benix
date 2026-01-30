@@ -7,7 +7,7 @@
 
 [bits 32]
 
-%define KERNEL_STACK                    0x80000
+%define KERNEL_STACK                    0x180000
 
 section .text
 global _start

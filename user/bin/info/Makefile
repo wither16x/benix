@@ -5,7 +5,7 @@ LD          := ld
 ASMFLAGS    := -f elf32
 CFLAGS		:= -m32 -ffreestanding -nostdlib -fno-pic -fno-pie -mno-sse -mno-mmx -mno-sse2 -fno-tree-vectorize \
 				 -g -c -I. -I../../../benlibc
-LDFLAGS     := -m elf_i386 -Ttext 0x120000 -entry main --oformat binary
+LDFLAGS     := -m elf_i386 -Ttext 0x400000 -entry main --oformat binary
 
 SRC_DIR     := .
 OBJ_DIR     := ../../../obj/user

@@ -2,9 +2,9 @@
 
 #include "klib/types.h"
 
-#define SHELL_ADDRESS                   0x90000
-#define PROG_ADDRESS                    0x120000
-#define ARGUMENTS_ADDRESS               0x70000
+#define SHELL_ADDRESS                   0x210000
+#define PROG_ADDRESS                    0x400000
+#define ARGUMENTS_ADDRESS               0x200000
 
 #define MAX_ARGUMENTS                   32
 

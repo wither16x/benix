@@ -12,5 +12,5 @@
 
 #define MAX_CHARS                   1024
 
-#define SHELL_ADDRESS               0x90000
-#define PROGRAM_ADDRESS             0x120000
+#define SHELL_ADDRESS               0x210000
+#define PROGRAM_ADDRESS             0x400000

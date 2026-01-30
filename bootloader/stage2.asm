@@ -7,11 +7,12 @@
 ; 1. Initialize the segments at 0x7e0:0
 ; 2. Set the stack at 0x8000 + 0xf000
 ; 3. Save the boot device byte (saved in dl by the boot sector right before the jump)
-; 4. Load the kernel at 0x1000:0
+; 4. Load the kernel at 0x9000:0
 ; 5. Load the GDT (Global Descriptor Table) defined in gdt.asm
 ; 6. Switch to protected mode
 ; 7. Initialize protected mode
-; 8. Jump to the kernel
+; 8. Copy the kernel from 0x9000:0 at 0x100000
+; 9. Jump to the kernel
 ;
 
 [bits 16]
@@ -30,7 +31,7 @@ start:
     mov [driveno], dl       ; driveno has been saved into dl before we jumped to start
 
     push es
-    mov ax, 0x1000
+    mov ax, 0x9000
     mov es, ax
     xor bx, bx
 
@@ -95,9 +96,16 @@ pmode_init:
     mov fs, ax
     mov gs, ax
     mov ss, ax
-    mov esp, 0x80000
+    mov esp, 0x180000
 
-    jmp 0x08:0x10000            ; jump to the kernel
+    ; copy the kernel at 0x100000
+    mov esi, 0x9000 * 16        ; physical address
+    mov edi, 0x100000           ; load address
+    mov ecx, 50 * 512           ; size
+    cld
+    rep movsb
+
+    jmp 0x08:0x100000           ; jump to the kernel
 
 hang:
     hlt

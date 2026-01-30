@@ -1,6 +1,6 @@
 [bits 32]
 
-%define USER_STACK                  0x200000
+%define USER_STACK                  0x2000000
 %define USER_CS                     0x1b
 %define USER_DS                     0x23
 
