@@ -16,7 +16,7 @@
                                         int argc = __cliParameters->argc; \
                                         char** argv = __cliParameters->argv;
 
-#define CLIARGS_ADDRESS                 0x70000
+#define CLIARGS_ADDRESS                 0x200000
 
 struct CommandLineArguments {
     int argc;
