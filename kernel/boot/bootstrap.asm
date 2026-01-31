@@ -9,6 +9,22 @@
 
 %define KERNEL_STACK                    0x180000
 
+section .multiboot2
+align 8
+
+multiboot2_header:
+    dd 0xE85250D6                           ; magic
+    dd 0                                    ; architecture = i386
+    dd header_end - multiboot2_header
+    dd -(0xE85250D6 + 0 + (header_end - multiboot2_header))
+
+; end tag
+align 8
+    dw 0                                    ; type = END
+    dw 0                                    ; flags
+    dd 8                                    ; size
+header_end:
+
 section .text
 global _start
 extern kmain

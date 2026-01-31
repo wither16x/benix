@@ -1,9 +1,7 @@
-import { build } from "./build.ab"
-
 pub fun run(args: [Text]) {
     for arg in args {
         if arg == "qemu" {
-            $ qemu-system-i386 -drive format=raw,file=images/benix.img -m 512M $
+            $ qemu-system-i386 -cdrom images/benix.iso -drive format=raw,file=images/benix.img -boot d -m 512M $
                 failed {
                     echo "Failed to run qemu"
                 }

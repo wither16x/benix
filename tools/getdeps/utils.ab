@@ -1,0 +1,21 @@
+pub fun git_clone(url: Text, dir: Text, branch: Text, depth: Int) {
+    $ git clone {url} {dir} --branch={branch} --depth={depth} $ failed {
+        echo "Failed to clone branch {branch} from {url} in {dir} using git"
+    }
+}
+
+pub fun make(dir: Text) {
+    $ make -C {dir} clean $ failed {
+        echo "Failed to clean build for {dir}"
+    }
+
+    $ make -C {dir} $ failed {
+        echo "Failed to build {dir}"
+    }
+}
+
+pub fun cp(src: Text, dest: Text) {
+    $ cp {src} {dest} $ failed {
+        echo "Failed to copy {src} into {dest}"
+    }
+}

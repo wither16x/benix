@@ -1,0 +1,46 @@
+#!/usr/bin/env amber
+
+import { build } from "./build.ab"
+import { run } from "./run.ab"
+
+main(args) {
+    let i = 0
+    let image = "benix.img"
+    let bootloader = "limine"
+
+    for arg in args {
+        if arg == "help" {
+            echo "Image builder for the Benix operating system -- made by Wither__"
+            echo "================================================================"
+            echo "help                  : display this message"
+            echo "version               : display the version of Benix this tool"
+            echo "                        is made for"
+            echo "build [subcmd]        : build the Benix source code"
+            echo "emulate [subcmd]      : run Benix in an emulator"
+        }
+        if arg == "version" {
+            echo "Installer for Benix version 0.0.3"
+        }
+        if arg == "build" {
+            if args[i + 1] == "image" {
+                image = args[i + 2]
+            }
+            if args[i + 1] == "bootloader" {
+                bootloader = args[i + 2]
+                if bootloader == "benix" {
+                    echo "[mkimage] warning: the Benix bootloader is NOT RECOMMENDED since it doesn't have the required
+features and is no more fully integrated in this tool. However I am working on it! You should use
+Limine instead"
+                }
+            }
+            build(image, bootloader)
+        }
+        if arg == "emulate" {
+            if args[i + 1] == "qemu" {
+                run(["qemu"])
+            }
+        }
+
+        i += 1
+    }
+}

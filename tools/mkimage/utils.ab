@@ -49,3 +49,9 @@ pub fun mcopy(image: Text, file: Text, dir: Text) {
         echo "Failed to copy {file} to {dir} in FAT image {image}"
     }
 }
+
+pub fun cp_v(src: Text, dest: Text) {
+    $ cp -v {src} {dest} $ failed {
+        echo "Failed to copy {src} into {dest}"
+    }
+}

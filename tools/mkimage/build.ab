@@ -1,0 +1,84 @@
+import { set_e, mkdir, make, nasm, dd, dd_copy, mkfs_fat, mcopy,
+cp_v } from "./utils.ab"
+
+pub fun build(use_image: Text, use_bootloader: Text) {
+    set_e()
+
+    let build_directories = ["binaries", "binaries/user", "binaries/user/bin", "images"]
+    let dir_bootloader = "bootloader"
+    if use_bootloader == "benix" {
+        dir_bootloader = "bootloader/benix"
+    }
+    if use_bootloader == "limine" {
+        dir_bootloader = "bootloader/limine"
+    }
+    let bootloader_files = ["bootsect", "stage2"]
+    let dir_kernel = "kernel"
+    let dir_benlibc = "benlibc"
+    let dir_user = "user"
+    let user_programs = ["bin/ls", "bin/cash", "bin/echo", "bin/info", "bin/show", "bin/touch", "bin/write",
+                         "bin/mkdir", "bin/rm"]
+
+    for d in build_directories {
+        mkdir(d)
+    }
+
+    make(dir_kernel)
+    make(dir_benlibc)
+
+    for p in user_programs {
+        make("{dir_user}/{p}")
+    }
+
+    if use_bootloader == "benix" {
+        for f in bootloader_files {
+            nasm("binaries/{f}.bin", "{dir_bootloader}/{f}.asm")
+        }
+    }
+    if use_bootloader == "limine" {
+        mkdir("iso_root")
+        mkdir("iso_root/boot/")
+        mkdir("iso_root/boot/limine")
+        mkdir("iso_root/EFI/BOOT")
+
+        cp_v("binaries/kernel.elf", "iso_root/boot/benix")
+        cp_v("bootloader/limine/limine.conf limine/limine-bios.sys limine/limine-bios-cd.bin limine/limine-uefi-cd.bin", "iso_root/boot/limine/")
+        cp_v("limine/BOOTX64.EFI", "iso_root/EFI/BOOT/")
+        cp_v("limine/BOOTIA32.EFI", "iso_root/EFI/BOOT/")
+
+        $
+        xorriso -as mkisofs -R -r -J -b boot/limine/limine-bios-cd.bin \\
+        -no-emul-boot -boot-load-size 4 -boot-info-table -hfsplus \\
+        -apm-block-size 2048 --efi-boot boot/limine/limine-uefi-cd.bin \\
+        -efi-boot-part --efi-boot-image --protective-msdos-label \\
+        iso_root -o images/benix.iso
+        $ failed {
+            echo "Failed to create ISO"
+        }
+
+        $ ./limine/limine bios-install images/benix.iso $ failed {
+            echo "Failed to install Limine on ISO"
+        }
+    }
+
+    if (use_image == "benix.img") {
+        dd("/dev/zero", "images/benix.img", 512, 2880)
+        mkfs_fat(12, "images/benix.img")
+
+        if use_bootloader != "limine" {
+            dd_copy("binaries/bootsect.bin", "images/benix.img", 0)
+            dd_copy("binaries/stage2.bin", "images/benix.img", 1)
+            dd_copy("binaries/kernel.bin", "images/benix.img", 10)
+        }
+
+        mcopy("images/benix.img", "{dir_user}/README.txt", "::")
+        mcopy("images/benix.img", "{dir_user}/LICENSE.txt", "::")
+        mcopy("images/benix.img", "{dir_user}/sys", "::")
+        mcopy("images/benix.img", "{dir_user}/home", "::")
+        mcopy("images/benix.img", "binaries/user/bin", "::")
+    }
+}
+
+main(args) {
+    build(args[0], args[1])
+}

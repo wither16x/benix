@@ -61,7 +61,7 @@ start:
     xor bx, bx
 
     mov ah, 0x02
-    mov al, 1
+    mov al, 10
     mov ch, 0x00
     mov cl, 0x02            ; STAGE2 MUST BE AT SECTOR 2
     mov dh, 0x00

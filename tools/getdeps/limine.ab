@@ -1,0 +1,9 @@
+import {git_clone, make, cp} from "./utils.ab"
+
+pub fun download_limine() {
+    git_clone("https://codeberg.org/Limine/limine.git", "limine", "v10.x-binary", 1)
+    git_clone("https://codeberg.org/Limine/limine-protocol.git", "limine-protocol", "trunk", 1)
+
+    make("limine")
+    cp("limine-protocol/include/limine.h", "kernel/limine.h")
+}

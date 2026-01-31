@@ -1,0 +1,18 @@
+#!/usr/bin/env  amber
+
+import { download_limine } from "./limine.ab"
+
+main(args) {
+    for arg in args {
+        if arg == "help" {
+            echo "Get dependencies to build Benix -- made by Wither__"
+            echo "==================================================="
+            echo "help                  : display this message"
+            echo "limine                : download the Limine bootloader"
+        }
+
+        if arg == "limine" {
+            download_limine()
+        }
+    }
+}

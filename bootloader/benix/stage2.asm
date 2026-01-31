@@ -7,11 +7,11 @@
 ; 1. Initialize the segments at 0x7e0:0
 ; 2. Set the stack at 0x8000 + 0xf000
 ; 3. Save the boot device byte (saved in dl by the boot sector right before the jump)
-; 4. Load the kernel at 0x9000:0
+; 4. Load the kernel at 0x1000:0
 ; 5. Load the GDT (Global Descriptor Table) defined in gdt.asm
 ; 6. Switch to protected mode
 ; 7. Initialize protected mode
-; 8. Copy the kernel from 0x9000:0 at 0x100000
+; 8. Copy the kernel from 0x1000:0 at 0x100000
 ; 9. Jump to the kernel
 ;
 
@@ -31,14 +31,14 @@ start:
     mov [driveno], dl       ; driveno has been saved into dl before we jumped to start
 
     push es
-    mov ax, 0x9000
+    mov ax, 0x1000
     mov es, ax
     xor bx, bx
 
     mov ah, 0x02
     mov al, 50
     mov ch, 0x00
-    mov cl, 0x03                ; load kernel at sector 3, depends of the size of this program
+    mov cl, 0xb                ; load kernel at sector 11, depends of the size of this program
     mov dh, 0x00
     mov dl, [driveno]
     int 0x13
@@ -83,7 +83,7 @@ print:
 
     ret
 
-%include "bootloader/gdt.asm"
+%include "bootloader/benix/gdt.asm"
 
 driveno:                    db      0
 reboot_msg:                 db      "Disk error! Press a key to reboot...", 0
@@ -99,7 +99,7 @@ pmode_init:
     mov esp, 0x180000
 
     ; copy the kernel at 0x100000
-    mov esi, 0x9000 * 16        ; physical address
+    mov esi, 0x1000 * 16        ; physical address
     mov edi, 0x100000           ; load address
     mov ecx, 50 * 512           ; size
     cld
@@ -112,4 +112,4 @@ hang:
     jmp hang
 
 ; fill the rest of the sector with zeroes
-times 512 - ($ - $$) db 0
+times 512 * 10 - ($ - $$) db 0

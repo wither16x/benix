@@ -22,7 +22,8 @@ Benix is a small 32-bit hobby operating system for x86 I made for fun and learni
 - Benlibc (a small libc for userspace programs)
 - Klib (C library embedded in the kernel)
 ## Tools
-- Installer (`tools/benix-installer/`)
+- Image builder (`tools/mkimage/`)
+- Dependencies installer (`tools/getdeps`)
 
 ## Build instructions
 First, you need to clone the git repository. If you don't have git, you can install it from your distribution packages.
@@ -31,24 +32,35 @@ git clone https://github.com/wither16x/benix
 ```
 Benix does not use BASH, ZSH or any other standard shell scripting language for its build scripts. Instead, it uses [the Amber programming language](https://github.com/amber-lang/amber). Make sure it is installed on your system and run the following command:
 ```sh
-tools/benix-installer/run -- build
+tools/mkimage/run -- build
 ```
 You can also build the system on an existing FAT12 image, so it will not be reformated:
 ```sh
-tools/benix-installer/run -- build image path/to/your/image.img
+tools/mkimage/run -- build image path/to/your/image.img
+```
+It is recommended to build Benix with **the Limine bootloader** (you would get a warning if you build it with the Benix bootloader).
+```sh
+tools/mkimage/run -- build bootloader limine # or benix
+```
+**Note:** you need to download and compile Limine before building the OS. To do so, you can use `getdeps`:
+```sh
+tools/getdeps/run -- limine
 ```
 **Note:** you should verify the version of the OS you are building first:
 ```sh
-tools/benix-installer/run -- version
+tools/mkimage/run -- version
 ```
+### Bootloader: Benix
 Now, a floppy image should be available as `images/benix.img`.
+### Bootloader: Limine
+An ISO file and a floppy image should be available in `images/` as `benix.iso` and `benix.img` (or the name you specified for the floppy).
 If you have `qemu` and you want to try Benix on it, execute the command below:
 ```sh
-tools/benix-installer/run -- emulate qemu
+tools/mkimage/run -- emulate qemu
 ```
-**Note**: if you need more informations about the Benix installer, run this command:
+**Note**: if you need more informations about the Benix image builder, run this command:
 ```sh
-tools/benix-installer/run -- help
+tools/mkimage/run -- help
 ```
 **Benix has not been tried on real hardware yet!**
 

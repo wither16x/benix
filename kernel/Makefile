@@ -9,7 +9,7 @@ LDFLAGS     := -m elf_i386 -T linker.ld
 
 SRC_DIR     := .
 OBJ_DIR     := obj
-TARGET      := ../binaries/kernel.bin
+TARGET      := ../binaries/kernel.elf
 
 ASM_FILES   := $(shell find $(SRC_DIR) -name '*.asm')
 C_FILES	:= $(shell find $(SRC_DIR) -name '*.c')
