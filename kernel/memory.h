@@ -8,3 +8,4 @@
 #define ADDR_SHELL                          0x210000
 #define ADDR_USER_PROGRAMS                  0x400000
 #define ADDR_USER_STACK                     0x2000000
+#define ADDR_BITMAP_FRAMES                  0x2200000

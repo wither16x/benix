@@ -19,6 +19,7 @@ void kmain(u32 mb2_tag_addr) {
     install_video();
     recover_bootinfo(mb2_tag_addr);
     install_gdt_idt();
+    install_memory();
     install_drivers();
     install_proc();
     install_tss();

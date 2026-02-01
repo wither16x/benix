@@ -13,6 +13,7 @@
 #include "drivers/keyboard.h"
 #include "drivers/fs/fat12.h"
 #include "memory.h"
+#include "mm/pmm.h"
 #include "proc/loader.h"
 #include "cpu/tss.h"
 #include "klib/null.h"
@@ -40,6 +41,18 @@ void install_gdt_idt(void) {
 
     init_idt();
     info("initialized and loaded IDT");
+}
+
+void install_memory(void) {
+    init_pmm(get_bootinfo()->total_memory, (u8*)ADDR_BITMAP_FRAMES);
+    info("initialized PMM");
+    //u64 frame1 = get_pmm()->alloc();
+    //debug("frame 1: 0x%x", frame1);
+    //u64 frame2 = get_pmm()->alloc();
+    //debug("frame 2: 0x%x", frame2);
+    //get_pmm()->free(frame2);
+    //u64 frame3 = get_pmm()->alloc();
+    //debug("frame 3: 0x%x", frame3);
 }
 
 void install_drivers(void) {

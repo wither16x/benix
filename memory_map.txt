@@ -9,3 +9,4 @@ argc/argv:                      200000
 Shell:                          210000
 User programs:                  400000
 User stack:                     2000000
+Frames bitmap:                  2200000
