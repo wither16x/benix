@@ -5,9 +5,13 @@ SECTIONS
 {
     . = 0x100000;
 
+    .multiboot2 ALIGN(8) :
+    {
+        KEEP(*(.multiboot2*))
+    }
+
     .text ALIGN(0x1000) :
     {
-        *(.multiboot2*)
         *(.text*)
     }
 

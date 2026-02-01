@@ -4,26 +4,17 @@ Benix is a small 32-bit hobby operating system for x86 I made for fun and learni
 ![Benix showcase 0](assets/benix_showcase0.png)
 
 ## Features
-### Drivers
-- PIC
-- PS/2 keyboard
-- Keyboard
-- ATA
-- FAT12
-- VGA
-- Console
-### Executable file formats
-- Flat binary
-### Userspace
-- Syscalls
-- User programs
-- Shell (CASH)
-### Libraries
-- Benlibc (a small libc for userspace programs)
-- Klib (C library embedded in the kernel)
-## Tools
-- Image builder (`tools/mkimage/`)
-- Dependencies installer (`tools/getdeps`)
+- Multiboot 2 protocol compatibility
+- Limine bootloader compatibility
+- Useful tools for building
+- Minimalist userspace libc
+- Userspace
+- Flat binary loader
+- VGA text mode support
+- FAT12 filesystem support
+- ATA PIO disk support
+- PS/2 keyboard support
+- PIC support
 
 ## Build instructions
 First, you need to clone the git repository. If you don't have git, you can install it from your distribution packages.

@@ -10,10 +10,14 @@
 #include "init/init.h"
 #include "klib/bool.h"
 #include "klib/asm.h"
+#include "memory.h"
 
-void kmain(void) {
+struct Multiboot2_Info* pbootinfo;
+
+void kmain(u32 mb2_tag_addr) {
     // initialize kernel components
     install_video();
+    recover_bootinfo(mb2_tag_addr);
     install_gdt_idt();
     install_drivers();
     install_proc();
@@ -23,7 +27,7 @@ void kmain(void) {
     STI
 
     // switch to usermode
-    enter_usermode(0x210000);
+    enter_usermode(ADDR_SHELL);
 
     // loop on HLT to save power
     while (true) {

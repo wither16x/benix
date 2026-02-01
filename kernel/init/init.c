@@ -1,4 +1,6 @@
 #include "init/init.h"
+#include "boot/bootinfo.h"
+#include "boot/multiboot2.h"
 #include "drivers/vga.h"
 #include "drivers/console.h"
 #include "klib/io.h"
@@ -10,6 +12,7 @@
 #include "drivers/ps2.h"
 #include "drivers/keyboard.h"
 #include "drivers/fs/fat12.h"
+#include "memory.h"
 #include "proc/loader.h"
 #include "cpu/tss.h"
 #include "klib/null.h"
@@ -19,6 +22,16 @@ void install_video(void) {
     init_driver_console(get_driver_vga());
     info("initialized VGA driver");
     info("initialized VGA console");
+}
+
+void recover_bootinfo(u32 multiboot2) {
+    init_bootinfo();
+    info("initialized boot informations");
+
+    multiboot2_parse(multiboot2, get_bootinfo());
+    info("parsed Multiboot 2 header");
+
+    debug("total memory: %d bytes", get_bootinfo()->total_memory);
 }
 
 void install_gdt_idt(void) {
@@ -67,7 +80,7 @@ void install_proc(void) {
         error("bin/cash not found");
         return;
     } else {
-        get_program_loader()->load("bin/cash", 512 * 10, SHELL_ADDRESS, NULL);
+        get_program_loader()->load("bin/cash", 512 * 10, ADDR_SHELL, NULL);
         info("loaded user program");
     }
 }

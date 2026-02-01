@@ -8,16 +8,17 @@
 #include "klib/io.h"
 #include "klib/asm.h"
 #include "klib/memory.h"
+#include "memory.h"
 
 static struct ProgramLoader loader;
 
 static void load(string path, u32 bytes, u32 address, struct CommandLineArguments* args) {
-    memmove((voidptr)ARGUMENTS_ADDRESS, args, sizeof(struct CommandLineArguments));
+    memmove((voidptr)ADDR_ARGC_ARGV, args, sizeof(struct CommandLineArguments));
     fread(path, (u8*)address, bytes);
 }
 
 static void exec(void) {
-    void (*func)(void) = (void (*)())SHELL_ADDRESS;
+    void (*func)(void) = (void (*)())ADDR_SHELL;
     func();
 }
 
