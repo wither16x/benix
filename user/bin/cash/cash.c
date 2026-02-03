@@ -81,7 +81,7 @@ void main() {
 
         memmove((void*)CLIARGS_ADDRESS, &cliargs, sizeof(cliargs));
 
-        void (*program)(void) = (void (*)())prog_address;
+        int (*program)(void) = (int (*)())prog_address;
         program();
     }
 }

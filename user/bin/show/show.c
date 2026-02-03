@@ -4,7 +4,7 @@
 #include <cli.h>
 #include <stdio.h>
 
-void main() {
+int main() {
     benix_GetCLIArgs();
 
     char buffer[512 * 10];
@@ -12,7 +12,7 @@ void main() {
 
     if (argc < 2) {
         printf("Filename required\n");
-        return;
+        return 1;
     }
 
     for (int i = 1; i < argc; i++) {
@@ -26,11 +26,15 @@ void main() {
             result = fread(argv[i], buffer, sizeof(buffer));
             if (result == -1) {
                 printf("File not found: %s\n", argv[i]);
+                return 1;
             } else if (result == -2) {
                 printf("Is a directory: %s\n", argv[i]);
+                return 1;
             } else {
                 printf("%s", buffer);
             }
         }
     }
+
+    return 0;
 }

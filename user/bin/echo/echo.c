@@ -4,11 +4,11 @@
 
 #include "echo.h"
 
-void main() {
+int main() {
     benix_GetCLIArgs();
 
     if (argc < 2) {
-        return;
+        return 1;
     }
 
     if (strcmp(argv[1], CMD_HELP_SHORT) == 0 || strcmp(argv[1], CMD_HELP_LONG) == 0) {
@@ -17,11 +17,13 @@ void main() {
         printf("NONE                        : display a newline\n");
         printf("-h / --help                 : display this message\n");
         printf("[text]                      : display the given text\n");
-        return;
+        return 0;
     }
 
     for (int i = 1; i < argc; i++) {
         printf("%s ", argv[i]);
     }
     printf("\n");
+
+    return 0;
 }

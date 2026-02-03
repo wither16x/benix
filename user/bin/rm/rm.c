@@ -4,14 +4,14 @@
 #include <syscall.h>
 #include <stdio.h>
 
-void main() {
+int main() {
     benix_GetCLIArgs();
 
     int result;
 
     if (argc < 2) {
         printf("Filename required\n");
-        return;
+        return 1;
     }
 
     for (int i = 1; i < argc; i++) {
@@ -25,36 +25,38 @@ void main() {
         else if (strcmp(argv[i], CMD_DIR_SHORT) == 0 || strcmp(argv[i], CMD_DIR_LONG) == 0) {
             if (!argv[i + 1]) {
                 printf("Directory not specified\n");
-                break;
+                return 1;
             }
             
             result = syscall_dirrem(argv[i + 1]);
             if (result == -1) {
                 printf("Cannot remove /\n");
-                break;
+                return 1;
             } else if (result == -2) {
                 printf("Directory not found: %s\n", argv[i + 1]);
-                break;
+                return 1;
             } else if (result == -3) {
                 printf("Is not a directory: %s\n", argv[i + 1]);
-                break;
+                return 1;
             } else if (result == -4) {
                 printf("Directory not empty: %s\n", argv[i + 1]);
-                break;
+                return 1;
             }
-            break;
+            return 0;
         }
 
         else {
             result = syscall_frem(argv[i]);
             if (result == -1) {
                 printf("File not found: %s\n", argv[i]);
-                break;
+                return 1;
             } else if (result == -2) {
                 printf("Is a directory: %s\n", argv[i]);
-                break;
+                return 1;
             }
-            break;
+            return 0;
         }
     }
+
+    return 0;
 }

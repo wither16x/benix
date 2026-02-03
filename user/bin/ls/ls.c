@@ -5,7 +5,7 @@
 
 #include "ls.h"
 
-void main() {
+int main() {
     benix_GetCLIArgs();
 
     char buffer[224 * 11];
@@ -13,7 +13,7 @@ void main() {
 
     if (argc < 2) {
         syscall_lsdir("/", buffer);
-        return;
+        return 0;
     }
 
     for (int i = 1; i < argc; i++) {
@@ -36,4 +36,6 @@ void main() {
             }
         }
     }
+
+    return 0;
 }

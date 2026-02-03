@@ -4,7 +4,7 @@
 #include <cli.h>
 #include <string.h>
 
-void main() {
+int main() {
     benix_GetCLIArgs();
 
     char buffer_name[12];
@@ -19,11 +19,11 @@ void main() {
 
         if (name_found == -1 || version_found == -1 || arch_found == -1) {
             printf("Missing information files in sys/\n");
-            return;
+            return 1;
         }
 
         printf("Name: %s\nVersion: %s\nArchitecture: %s\n", buffer_name, buffer_version, buffer_arch);
-        return;
+        return 0;
     }
     
     for (int i = 1; i < argc; i++) {
@@ -41,7 +41,7 @@ void main() {
             name_found = fread("sys/name.txt", buffer_name, sizeof(buffer_name));
             if (name_found == -1) {
                 printf("Could not find sys/name.txt\n");
-                return;
+                return 1;
             }
             printf("%s\n", buffer_name);
         }
@@ -50,7 +50,7 @@ void main() {
             version_found = fread("sys/version.txt", buffer_version, sizeof(buffer_version));
             if (version_found == -1) {
                 printf("Could not find sys/version.txt\n");
-                return;
+                return 1;
             }
             printf("%s\n", buffer_version);
         }
@@ -59,7 +59,7 @@ void main() {
             arch_found = fread("sys/arch.txt", buffer_arch, sizeof(buffer_arch));
             if (arch_found == -1) {
                 printf("Could not find sys/arch.txt\n");
-                return;
+                return 1;
             }
             printf("%s\n", buffer_arch);
         }
@@ -68,4 +68,6 @@ void main() {
             printf("Invalid option: %s\n", argv[i]);
         }
     }
+
+    return 0;
 }

@@ -4,14 +4,14 @@
 #include <stdio.h>
 #include <string.h>
 
-void main() {
+int main() {
     benix_GetCLIArgs();
 
     int result;
 
     if (argc < 2) {
         printf("Missing filename\n");
-        return;
+        return 1;
     }
 
     for (int i = 1; i < argc; i++) {
@@ -25,28 +25,30 @@ void main() {
             result = syscall_fnew(argv[i]);
             switch (result) {
                 case 0:
-                    break;
+                    return 0;
 
                 case -1:
                     printf("Path is not valid\n");
-                    break;
+                    return 1;
 
                 case -2:
                     printf("Parent path is not a directory\n");
-                    break;
+                    return 1;
 
                 case -3:
                     printf("This file already exists\n");
-                    break;
+                    return 1;
 
                 case -4:
                     printf("No more disk space available\n");
-                    break;
+                    return 1;
 
                 default:
                     printf("An error occured\n");
-                    break;
+                    return 1;
             }
         }
     }
+
+    return 0;
 }
