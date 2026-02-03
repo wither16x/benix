@@ -36,9 +36,9 @@ static void map(u32 virt, u32 phys, u32 flags) {
             pde_flags |= PAGE_USER;
         }
 
-        pd->entries[idx_pd] = ((u32)pt & 0xfffff000) | pde_flags;
+        pd->entries[idx_pd] = ((u32)pt & PAGE_ADDRESS_MASK) | pde_flags;
     } else {
-        pt = (struct PageTable*)(pd->entries[idx_pd] & 0xfffff000);
+        pt = (struct PageTable*)(pd->entries[idx_pd] & PAGE_ADDRESS_MASK);
         if (flags & PAGE_USER) {
             pd->entries[idx_pd] |= PAGE_USER;
         }

@@ -51,6 +51,8 @@ void install_memory(void) {
     init_vmm();
     info("initialized VMM");
 
+    map_low_memory();
+    info("mapped low memory");
     map_kernel();
     info("mapped kernel");
     map_userspace();
