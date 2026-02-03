@@ -9,7 +9,7 @@
 isr_stub_%+%1:
     cli
     push %1
-    call isr_common
+    jmp isr_common
 %endmacro
 
 %macro isr_no_err_stub 1
