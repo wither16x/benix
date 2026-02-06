@@ -3,10 +3,17 @@
 #include "mm/paging.h"
 #include "mm/pmm.h"
 #include "mm/vmm.h"
+#include "klib/asm.h"
 
 void setup_paging(void) {
     struct PageDirectory* kpd = get_kernel_page_table();
     enable_paging((u32)kpd);
+}
+
+bool is_paging_enabled(void) {
+    u32 cr0;
+    ASM("mov %%cr0, %0" : "=r"(cr0));
+    return cr0 & (1u << 31);
 }
 
 void map_low_memory(void) {

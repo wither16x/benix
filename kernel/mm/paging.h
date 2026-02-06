@@ -11,3 +11,4 @@
 #define PAGE_ADDRESS_MASK           0xfffff000
 
 void enable_paging(u32 pd);
+bool is_paging_enabled(void);

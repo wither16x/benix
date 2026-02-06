@@ -1,4 +1,5 @@
 #include "mm/vmm.h"
+#include "klib/asm.h"
 #include "mm/pmm.h"
 #include "klib/null.h"
 #include "klib/memory.h"
@@ -45,6 +46,10 @@ static void map(u32 virt, u32 phys, u32 flags) {
     }
 
     pt->entries[idx_pt] = (phys & 0xfffff000) | flags;
+
+    if (is_paging_enabled()) {
+        INVLPG((voidptr)virt)
+    }
 }
 
 void init_vmm(void) {
