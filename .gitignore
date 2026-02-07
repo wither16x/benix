@@ -28,3 +28,7 @@ TODO.md
 /limine/
 /limine-protocol/
 kernel/limine.h
+
+# Temporary
+kernel/proc/elf.h
+kernel/proc/elf.c

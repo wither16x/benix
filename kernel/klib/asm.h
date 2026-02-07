@@ -19,6 +19,7 @@
 #define INB(p)                  __asm_inb(p);
 #define INW(p)                  __asm_inw(p);
 #define INL(p)                  __asm_inl(p);
+#define INVLPG(m)               __asm_invlpg(m);
 
 // hlt (stops the CPU until an interrupt is received)
 static inline void __asm_hlt() {
@@ -69,6 +70,11 @@ static inline u32 __asm_inl(u16 port) {
     u32 ret;
     __asm__ volatile ("inl %w1, %l0" : "=a"(ret) : "Nd"(port) : "memory");
     return ret;
+}
+
+// invalidate TLB entries
+static inline void __asm_invlpg(voidptr m) {
+    __asm__ volatile("invlpg (%0)" :: "r"(m) : "memory");
 }
 
 // small I/O delay

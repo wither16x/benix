@@ -13,6 +13,7 @@
 #include "drivers/keyboard.h"
 #include "drivers/fs/fat12.h"
 #include "memory.h"
+#include "mm/heap.h"
 #include "mm/mapping.h"
 #include "mm/pmm.h"
 #include "mm/vmm.h"
@@ -61,6 +62,9 @@ void install_memory(void) {
     info("mapped bitmap");
     setup_paging();
     info("paging enabled");
+
+    init_heap();
+    info("initialize heap");
 }
 
 void install_drivers(void) {

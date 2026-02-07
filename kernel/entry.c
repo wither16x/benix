@@ -12,8 +12,6 @@
 #include "klib/asm.h"
 #include "memory.h"
 
-struct Multiboot2_Info* pbootinfo;
-
 void kmain(u32 mb2_tag_addr) {
     // initialize kernel components
     install_video();

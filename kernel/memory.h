@@ -9,3 +9,5 @@
 #define ADDR_USER_PROGRAMS                  0x400000
 #define ADDR_USER_STACK                     0x2000000
 #define ADDR_BITMAP_FRAMES                  0x2200000
+#define ADDR_KERNEL_HEAP                    0x3000000
+#define ADDR_KERNEL_HEAP_END                0x5000000
