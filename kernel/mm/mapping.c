@@ -6,7 +6,7 @@
 #include "klib/asm.h"
 
 void setup_paging(void) {
-    struct PageDirectory* kpd = get_kernel_page_table();
+    struct PageDirectory* kpd = get_kernel_pd();
     enable_paging((u32)kpd);
 }
 

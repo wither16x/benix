@@ -19,3 +19,9 @@ pub fun cp(src: Text, dest: Text) {
         echo "Failed to copy {src} into {dest}"
     }
 }
+
+pub fun apt_install(pkg: Text) {
+    $ apt install {pkg} $ failed {
+        echo "Failed to install {pkg} using APT"
+    }
+}

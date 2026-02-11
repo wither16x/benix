@@ -6,7 +6,7 @@
 #include "mm/paging.h"
 
 static struct VMM vmm;
-static struct PageDirectory* pd;
+static struct PageDirectory* kpd;
 
 static struct PageTable* alloc_table(void) {
     struct PageTable* pt;
@@ -27,7 +27,7 @@ static void map(u32 virt, u32 phys, u32 flags) {
     u32 pde_flags = PAGE_PRESENT | PAGE_RW;
     struct PageTable* pt;
 
-    if (!(pd->entries[idx_pd] & 1)) {
+    if (!(kpd->entries[idx_pd] & 1)) {
         pt = alloc_table();
         if (!pt) {
             return;
@@ -37,11 +37,11 @@ static void map(u32 virt, u32 phys, u32 flags) {
             pde_flags |= PAGE_USER;
         }
 
-        pd->entries[idx_pd] = ((u32)pt & PAGE_ADDRESS_MASK) | pde_flags;
+        kpd->entries[idx_pd] = ((u32)pt & PAGE_ADDRESS_MASK) | pde_flags;
     } else {
-        pt = (struct PageTable*)(pd->entries[idx_pd] & PAGE_ADDRESS_MASK);
+        pt = (struct PageTable*)(kpd->entries[idx_pd] & PAGE_ADDRESS_MASK);
         if (flags & PAGE_USER) {
-            pd->entries[idx_pd] |= PAGE_USER;
+            kpd->entries[idx_pd] |= PAGE_USER;
         }
     }
 
@@ -53,8 +53,8 @@ static void map(u32 virt, u32 phys, u32 flags) {
 }
 
 void init_vmm(void) {
-    pd = (struct PageDirectory*)alloc_table();
-    memset(pd, 0, sizeof(struct PageDirectory));
+    kpd = (struct PageDirectory*)alloc_table();
+    memset(kpd, 0, sizeof(struct PageDirectory));
 
     vmm.alloc_table = alloc_table;
     vmm.map = map;
@@ -64,6 +64,6 @@ struct VMM* get_vmm(void) {
     return &vmm;
 }
 
-struct PageDirectory* get_kernel_page_table(void) {
-    return pd;
+struct PageDirectory* get_kernel_pd(void) {
+    return kpd;
 }

@@ -21,4 +21,4 @@ struct VMM {
 
 void init_vmm(void);
 struct VMM* get_vmm(void);
-struct PageDirectory* get_kernel_page_table(void);
+struct PageDirectory* get_kernel_pd(void);
